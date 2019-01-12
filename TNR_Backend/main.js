@@ -1,5 +1,6 @@
 const Server = require('./server').Server
-const EntryRoutes = require('./routes/entry-routes')
+const EntryRoutes = require('./routes/entry-routes').EntryRoutes
+const Neo4j = require('./db/neo4j').Neo4j
 
 class Main {
   constructor (serverConfig, dbConfig) {
@@ -9,30 +10,26 @@ class Main {
 
   start () {
     this.server = new Server(this.serverConfig)
-    // this.db
-    this.entryRoutes = new EntryRoutes(this.serverConfig, this.dbConfig)
+    this.neo4j = new Neo4j(this.dbConfig)
+    this.entryRoutes = new EntryRoutes(this.neo4j)
+
+    this.bindToWebServer()
+    this.server.start()
   }
 
   bindToWebServer () {
     this.server.bind = [{
-      route: '/user/login',
+      route: '/login',
       method: 'post',
       onRequest: (req, res, next) => {
-        this.entryRouts.login(req, res, next)
+        this.entryRoutes.login(req, res, next)
       }
     },
     {
-      route: '/user/register',
+      route: '/register',
       method: 'post',
       onRequest: (req, res, next) => {
-        this.entryRouts.register(req, res, next)
-      }
-    },
-    {
-      route: `/realms/${this.serverConfig.iam.realm}/protocol/openid-connect/token`,
-      method: 'post',
-      onRequest: (req, res, next) => {
-        this.entryRouts.initClientAdapter(req, res, next)
+        this.entryRoutes.register(req, res, next)
       }
     }]
   }

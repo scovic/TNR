@@ -19,6 +19,8 @@
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.4.0",
     "morgan": "^1.9.1",
+    "neo4j-driver": "^1.7.2",
+    "node-env-file": "^0.1.8",
     "ocsp": "^1.2.0"
   }
 }

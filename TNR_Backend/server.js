@@ -7,12 +7,10 @@ const cors = require('cors')
 const morgan = require('morgan')
 const helmet = require('helmet')
 const session = require('express-session')
-const ocsp = require('ocsp')
 
 class Server {
   constructor (config) {
     this.serverConfig = config.server
-    this.iamConfig = config.iam
     this.app = express()
     this.router = express.Router()
     this.memoryStore = new session.MemoryStore()
@@ -47,7 +45,6 @@ class Server {
 
     if (this.serverConfig.isSecure) {
       this.app.use(helmet())
-      this.cache = new ocsp.Cache()
     }
 
     this.app.use(bodyParser.json({ limit: '50mb', parameterLimit: 1000000 }))

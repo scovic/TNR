@@ -1,44 +1,63 @@
 const jwtService = require('../services/jwt-service')
-const crypto = require('crypto')
 
 class EntryRoutes {
-  constructor (serverConfig, dbConfig) {
-    this.serverConfig = serverConfig
-    this.dbConfig = dbConfig
+  constructor (neo4j) {
+    this.neo4j = neo4j
+
+    this.neo4j.createConstraint('User', 'username')
+      .catch(e => console.log(e))
   }
 
   login (req, res, next) {
-    const token = jwtService.jwtSign(req)
-    token ? res.status(200).send(token) : res.status(403).send({ error: 'Not Authorized' })
-  }
+    const user = req.body
 
-  genRandomString (length) {
-    return crypto.randomBytes(Math.ceil(length / 2))
-      .toString('hex')
-      .slice(0, length) // return required number of characters
-  }
-
-  sha512 (password, salt) {
-    const hash = crypto.createHmac('sha512', salt)
-    hash.update(password)
-    const value = hash.digest('hex')
-    return {
-      salt: salt,
-      passwordHash: value
+    if (!user.username || !user.password) {
+      res.status(400).send({ error: 'Not all login details provided' })
     }
+
+    const findCriteria = {
+      username: user.username
+    }
+
+    this.neo4j.findNode('User', findCriteria)
+      .then(result => {
+        const node = result.records[0].get(0).properties
+        if (node) {
+          const salt = node.salt
+          const userHash = jwtService.sha512(user.password, salt)
+          if (userHash.passwordHash === node.password) {
+            jwtService.jwtSign(node, res)
+          } else {
+            res.status(401).send({ error: 'Invalid credentials' })
+          }
+        } else {
+          res.status(401).send({ error: 'Invalid credentials' })
+        }
+      })
+      .catch(e => res.status(400).send(e))
   }
 
   register (req, res, next) {
-    if (!req.body.username || !req.body.password || !req.body.firstName || !req.body.lastName) {
+    const user = req.body
+    if (!user.username || !user.password || !user.email) {
       res.status(400).send({ error: 'Not all needed details provided' })
     }
 
-    // hash i salt za user password
-    const salt = this.genRandomString(16) // salt of length 16
-    const passwordSaltedHash = this.sha512(req.body.password, salt)
-    // dodaj usera u bazu, hashovan password i salt
+    // hash & salt for user password
+    const salt = jwtService.genRandomString(16) // salt of length 16
+    const passwordSaltedHash = jwtService.sha512(user.password, salt)
 
-    res.status(200).send({ status: 'Registered' })
+    user.password = passwordSaltedHash.passwordHash
+    user.salt = salt
+
+    this.neo4j.createNode('User', user)
+      .then(result => {
+        const node = result.records[0].get(0).properties
+        if (node) {
+          res.status(201).send({ status: 'Successfully registered' })
+        }
+      })
+      .catch(e => res.status(400).send({ error: e, message: 'Username already in use' }))
   }
 }
 module.exports.EntryRoutes = EntryRoutes

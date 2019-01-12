@@ -1,19 +1,17 @@
 const fs = require('fs')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 
-const privateKey = fs.readFileSync('../certs/private.key', 'utf8')
-const publicKey = fs.readFileSync('../certs/public.key', 'utf8')
+const privateKey = fs.readFileSync('certs/private.key', 'utf8')
+const publicKey = fs.readFileSync('certs/public.key', 'utf8')
 
-const jwtSign = (req) => {
-  // provera da li user postoji u bazi
-  // ako ne postoji, vrati null
-
-  const payload = { // moze tipa id tog usera iz baze
-    userId: 'dummy'
+const jwtSign = (user, res) => {
+  const payload = {
+    userId: user.username
   }
 
   const i = 'nevena&stefan_elfak_proj' // token issuer
-  const s = `u/${req.body.username}` // intended token user
+  const s = `u/${user.username}` // intended token user
 
   const signOptions = {
     issuer: i,
@@ -22,14 +20,14 @@ const jwtSign = (req) => {
     algorithm: 'RS256'
   }
 
-  const token = jwt.sign(payload, privateKey, signOptions)
-
-  return token
+  jwt.sign(payload, privateKey, signOptions, (err, token) => {
+    err ? res.status(400).send(err) : res.status(200).send({ access_token: token })
+  })
 }
 
-const jwtVerify = (req) => {
+const jwtVerify = (user) => {
   const i = 'nevena&stefan_elfak_proj' // token issuer
-  const s = `u/${req.body.username}` // intended token user
+  const s = `u/${user.username}` // intended token user
 
   const verifyOptions = {
     issuer: i,
@@ -38,11 +36,29 @@ const jwtVerify = (req) => {
     algorithm: ['RS256']
   }
 
-  const legit = jwt.verify(req.body.token, publicKey, verifyOptions)
+  const legit = jwt.verify(user.token, publicKey, verifyOptions)
   return legit
+}
+
+const genRandomString = (length) => {
+  return crypto.randomBytes(Math.ceil(length / 2))
+    .toString('hex')
+    .slice(0, length) // return required number of characters
+}
+
+const sha512 = (password, salt) => {
+  const hash = crypto.createHmac('sha512', salt)
+  hash.update(password)
+  const value = hash.digest('hex')
+  return {
+    salt: salt,
+    passwordHash: value
+  }
 }
 
 module.exports = {
   jwtSign: jwtSign,
-  jwtVerify: jwtVerify
+  jwtVerify: jwtVerify,
+  genRandomString: genRandomString,
+  sha512: sha512
 }
