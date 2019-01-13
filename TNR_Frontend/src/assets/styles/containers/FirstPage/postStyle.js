@@ -55,6 +55,19 @@ const postStyle = {
   },
   textContainer: {
     marginTop: "14px"
+  },
+  actionsContainer: {
+    color: "#878a8c",
+    display: "flex",
+    flexDirection: "row",
+    height: 24,
+    padding: "4px 8px 4px 0",
+    fontSize: 12,
+    fontWeight: 700
+  },
+  actionIcon: {
+    fontSize: 16,
+    marginBottom: -4
   }
 };
 

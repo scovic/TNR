@@ -4,10 +4,14 @@ import withStyles from "@material-ui/core/styles/withStyles";
 import Card from "components/Card/Card";
 import GridContainer from "components/Grid/GridContainer";
 import GridItem from "components/Grid/GridItem";
+import Action from "components/CustomAction/Action";
 
 import IconButton from "@material-ui/core/IconButton";
+
 import ArrowUpIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownIcon from "@material-ui/icons/ArrowDownward";
+import CommentsIcon from "@material-ui/icons/Forum";
+import BookmarkIcon from "@material-ui/icons/Bookmark";
 
 import PostStyle from "assets/styles/containers/FirstPage/postStyle";
 
@@ -53,23 +57,26 @@ class Post extends React.Component {
 
     const textContent = (
       <React.Fragment>
-        <div className={classes.opInfo}>
-          <span className={classes.communityName + " " + classes.hover}>
-            community
-          </span>
-          <span> - Posted by </span>
-          <span className={classes.hover}>OP name</span>
-        </div>
         <div className={classes.titleContainer}>
           <span className={classes.textTitle}>{title}</span>
         </div>
         <div className={classes.textContainer}>
           <span>{content}</span>
         </div>
-        <div>
-          <p>comments</p>
-        </div>
       </React.Fragment>
+    );
+
+    const actions = (
+      <div className={classes.actionsContainer}>
+        <Action
+          icon={<CommentsIcon className={classes.actionIcon} />}
+          label="123 Comments"
+        />
+        <Action
+          icon={<BookmarkIcon className={classes.actionIcon} />}
+          label="Save"
+        />
+      </div>
     );
 
     return (
@@ -79,7 +86,15 @@ class Post extends React.Component {
             {upvotesSection}
           </GridItem>
           <GridItem className={classes.contentSection} xs={10}>
+            <div className={classes.opInfo}>
+              <span className={classes.communityName + " " + classes.hover}>
+                community
+              </span>
+              <span> - Posted by </span>
+              <span className={classes.hover}>OP name</span>
+            </div>
             {textContent}
+            {actions}
           </GridItem>
         </GridContainer>
       </Card>

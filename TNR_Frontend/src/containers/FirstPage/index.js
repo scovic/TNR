@@ -44,7 +44,7 @@ class FirstPage extends React.Component {
           handleSignInOpen={this.handleSignInOpen}
         />
         <GridContainer justify="center">
-          <GridItem xs={12} md={6}>
+          <GridItem style={{ marginTop: 38 }} xs={12} md={6}>
             <Post />
           </GridItem>
         </GridContainer>

@@ -111,7 +111,7 @@ class Navbar extends React.Component {
             colorPrimary: classes.appBarRoot
           }}
           color="primary"
-          position="static"
+          position="fixed"
         >
           <Toolbar variant="dense">
             <NavbarSelect />
