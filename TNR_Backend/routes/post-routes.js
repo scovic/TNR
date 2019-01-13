@@ -74,12 +74,31 @@ class PostRoutes {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
       const post = req.body.post
-      const vote = req.body.vote // 0 - incr, 1 - decr
+      const vote = req.body.vote.status // 0 - incr, 1 - decr
 
       this.neo4j.findNode('Post', post)
-        .then(resp => { // incr upvotes then update
-          
+        .then(resp => {
+          let votes = resp.records[0].get(0).properties.upvotes
+          vote === 0 ? ++votes : --votes
+          this.neo4j.updateNode('Post', post, { upvotes: votes })
         })
+        .then(resp => res.status(200).send({ status: 'Votes updated.' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  getAllUserCommentedPosts (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const userId = {
+        id: req.params.id
+      }
+
+      this.neo4j.selectRelationship3ByNode1('User', 'Comment', 'Post', userId, 'COMMENTED', 'ON_POST')
+        .then(result => res.status(200).send(result.records))
+        .catch(e => res.status(400).send(e))
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }

@@ -58,9 +58,54 @@ class Neo4j {
     )
   }
 
+  selectAllByLabel (label) {
+    return this.session.run(
+      `MATCH (node: ${label}) RETURN node`
+    )
+  }
+
+  selectAllNodes () {
+    return this.session.run(
+      `MATCH (node) RETURN node`
+    )
+  }
+
+  countNodesByLabel (label) {
+    return this.session.run(
+      `MATCH (node:${label}) RETURN count(node) as count`
+    )
+  }
+
+  countNodesByCriteria (label, objToFind) {
+    const { id, ...objToFindNoId } = objToFind
+    const keys = Object.keys(objToFind)
+    let query = ''
+
+    if (keys.length > 0) {
+      keys.forEach(key => {
+        query += `node.${key}=${objToFindNoId[key]} AND `
+      })
+    }
+
+    id ? query += `ID(node)=${id}` : query = query.slice(0, query.length - 5)
+
+    return this.session.run(
+      `MATCH (node:${label}) WHERE ${query} RETURN count(node) as count`
+    )
+  }
+
   createConstraint (label, key) {
     return this.session.run(
       `CREATE CONSTRAINT ON (node: ${label}) ASSERT node.${key} IS UNIQUE`
+    )
+  }
+
+  createRelationshipGeneral (label1, label2, relationship) {
+    return this.session.run(
+      `MATCH (n1: ${label1}) WITH n1
+       MATCH (n2: ${label2})
+       CREATE (n1)-[r:${relationship}]->(n2)
+       RETURN r`
     )
   }
 
@@ -102,33 +147,6 @@ class Neo4j {
     )
   }
 
-  createRelationshipGeneral (label1, label2, relationship) {
-    return this.session.run(
-      `MATCH (n1: ${label1}) WITH n1
-       MATCH (n2: ${label2})
-       CREATE (n1)-[r:${relationship}]->(n2)
-       RETURN r`
-    )
-  }
-
-  selectAllByLabel (label) {
-    return this.session.run(
-      `MATCH (node: ${label}) RETURN node`
-    )
-  }
-
-  selectAllNodes () {
-    return this.session.run(
-      `MATCH (n) RETURN n`
-    )
-  }
-
-  countNodesByLabel (label) {
-    return this.session.run(
-      `MATCH (node:${label}) RETURN count(node) as count`
-    )
-  }
-
   countRelationships (label1, label2, relationship) {
     return this.session.run(
       `MATCH (:${label1})-[r:${relationship}]->(:${label2}) RETURN count(r) as count`
@@ -147,6 +165,14 @@ class Neo4j {
 
     return this.session.run(
       `MATCH (n1:${label1})-[r:${relationship}]->(n2:${label2}) WHERE ${query} RETURN n1`
+    )
+  }
+
+  selectRelationship3ByNode1 (lab1, lab2, lab3, obj1, rel1, rel2) { // get all nodes3 by relationships with node1 and node2
+    return this.session.run(
+      `MATCH (n1:${lab1})-[:${rel1}]-(:${lab2})-[:${rel2}]->(n3:${lab3})
+       WHERE ID(n1)=${obj1.id}
+       RETURN n3`
     )
   }
 

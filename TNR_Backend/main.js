@@ -68,6 +68,13 @@ class Main {
       onRequest: (req, res, next) => {
         this.postRoutes.vote(req, res, next)
       }
+    },
+    {
+      route: '/user/:id/commented-posts',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.postRoutes.getAllUserCommentedPosts(req, res, next)
+      }
     }]
   }
 }
