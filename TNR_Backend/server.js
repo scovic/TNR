@@ -78,11 +78,9 @@ class Server {
       // set locals, only providing error in development
       res.locals.message = err.message
       res.locals.error = req.app.get('env') === 'development' ? err : {}
-
-      let errorResponse = err
-      if (err.errors) errorResponse = err.errors
+      console.log(err)
       // render the error page
-      res.status(err.status || 500).json({ status: 'error', data: null, message: errorResponse })
+      res.status(err.status || 500).json({ status: 'error', data: null, message: err })
       // res.render('error')
     })
   }

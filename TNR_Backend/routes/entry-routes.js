@@ -10,7 +10,6 @@ class EntryRoutes {
 
   login (req, res, next) {
     const user = req.body
-
     if (!user.username || !user.password) {
       res.status(400).send({ error: 'Not all login details provided' })
     }
@@ -34,7 +33,7 @@ class EntryRoutes {
           res.status(401).send({ error: 'Invalid credentials' })
         }
       })
-      .catch(e => res.status(400).send(e))
+      .catch(e => res.status(401).send({ error: 'Invalid credentials' }))
   }
 
   register (req, res, next) {
