@@ -1,7 +1,10 @@
 const Server = require('./server').Server
+const Neo4j = require('./db/neo4j/neo4j-module').Neo4j
 const EntryRoutes = require('./routes/entry-routes').EntryRoutes
 const PostRoutes = require('./routes/post-routes').PostRoutes
-const Neo4j = require('./db/neo4j/neo4j-module').Neo4j
+const CommentRoutes = require('./routes/comment-routes').CommentRoutes
+const MainRoutes = require('./routes/main-routes').MainRoutes
+const CommunityRoutes = require('./routes/community-routes').CommunityRoutes
 
 class Main {
   constructor (serverConfig, dbConfig) {
@@ -14,6 +17,9 @@ class Main {
     this.neo4j = new Neo4j(this.dbConfig)
     this.entryRoutes = new EntryRoutes(this.neo4j)
     this.postRoutes = new PostRoutes(this.neo4j)
+    this.commentRoutes = new CommentRoutes(this.neo4j)
+    this.mainRoutes = new MainRoutes(this.neo4j)
+    this.communityRoutes = new CommunityRoutes(this.neo4j)
 
     this.bindToWebServer()
     this.server.start()
@@ -52,28 +58,93 @@ class Main {
       route: '/posts/delete',
       method: 'delete',
       onRequest: (req, res, next) => {
-        this.postRoutes.deletePost(req, res, next)
+        const label = 'Post'
+        this.mainRoutes.deleteOne(req, res, next, label)
       }
     },
     {
       route: '/posts/update',
       method: 'put',
       onRequest: (req, res, next) => {
-        this.postRoutes.updatePost(req, res, next)
+        const label = 'Post'
+        this.mainRoutes.updateOne(req, res, next, label)
       }
     },
     {
       route: '/posts/vote',
       method: 'put',
       onRequest: (req, res, next) => {
-        this.postRoutes.vote(req, res, next)
+        const label = 'Post'
+        this.mainRoutes.vote(req, res, next, label)
       }
     },
     {
       route: '/user/:id/commented-posts',
       method: 'get',
       onRequest: (req, res, next) => {
-        this.postRoutes.getAllUserCommentedPosts(req, res, next)
+        this.commentRoutes.getAllUserCommentedPosts(req, res, next)
+      }
+    },
+    {
+      route: '/comments/vote',
+      method: 'put',
+      onRequest: (req, res, next) => {
+        const label = 'Comment'
+        this.mainRoutes.vote(req, res, next, label)
+      }
+    },
+    {
+      route: '/comments/delete',
+      method: 'delete',
+      onRequest: (req, res, next) => {
+        const label = 'Comment'
+        this.mainRoutes.deleteOne(req, res, next, label)
+      }
+    },
+    {
+      route: '/comments/update',
+      method: 'put',
+      onRequest: (req, res, next) => {
+        const label = 'Comment'
+        this.mainRoutes.updateOne(req, res, next, label)
+      }
+    },
+    {
+      route: '/comments/add-new',
+      method: 'post',
+      onRequest: (req, res, next) => {
+        this.commentRoutes.addComment(req, res, next)
+      }
+    },
+    {
+      route: '/community/delete',
+      method: 'delete',
+      onRequest: (req, res, next) => {
+        const label = 'Community'
+        this.mainRoutes.deleteOne(req, res, next, label)
+      }
+    },
+    {
+      route: '/community/update',
+      method: 'put',
+      onRequest: (req, res, next) => {
+        const label = 'Community'
+        this.mainRoutes.updateOne(req, res, next, label)
+      }
+    },
+    {
+      route: '/communities',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        const label = 'Community'
+        this.mainRoutes.getAll(req, res, next, label)
+      }
+    },
+    {
+      route: '/community/add-new',
+      method: 'post',
+      onRequest: (req, res, next) => {
+        this.communityRoutes.addCommunity(req, res, next)
       }
     }]
   }

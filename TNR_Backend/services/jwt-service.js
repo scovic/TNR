@@ -25,9 +25,9 @@ const jwtSign = (user, res) => {
   })
 }
 
-const jwtVerify = (user) => {
+const jwtVerify = (username, token) => {
   const i = 'nevena&stefan_elfak_proj' // token issuer
-  const s = `u/${user.username}` // intended token user
+  const s = `u/${username}` // intended token user
 
   const verifyOptions = {
     issuer: i,
@@ -36,7 +36,7 @@ const jwtVerify = (user) => {
     algorithm: ['RS256']
   }
 
-  const legit = jwt.verify(user.token, publicKey, verifyOptions)
+  const legit = jwt.verify(token, publicKey, verifyOptions)
   return legit
 }
 
