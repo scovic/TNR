@@ -4,23 +4,23 @@ import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
+// import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
 import Badge from "@material-ui/core/Badge";
 import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 
 import Menu from "@material-ui/core/Menu";
-import MenuIcon from "@material-ui/icons/Menu";
+// import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
 
-import CButton from "../../components/CustomButtons/Button";
+import NavbarSelect from "./NavbarSelect";
 
-import NavbarStyle from "../../assets/styles/containers/FirstPage/navbarStyle";
+import NavbarStyle from "../../../assets/styles/containers/FirstPage/navbarStyle";
 
 class Navbar extends React.Component {
   constructor(props) {
@@ -54,7 +54,7 @@ class Navbar extends React.Component {
 
   render() {
     const { anchorEl, mobileMoreAnchorEl } = this.state;
-    const { classes } = this.props;
+    const { classes, handleSignUpOpen, handleSignInOpen } = this.props;
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -114,21 +114,7 @@ class Navbar extends React.Component {
           position="static"
         >
           <Toolbar variant="dense">
-            <IconButton
-              className={classes.menuButton}
-              color="inherit"
-              aria-label="Open drawer"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              className={classes.title}
-              variant="h6"
-              color="inherit"
-              noWrap
-            >
-              Material-UI
-            </Typography>
+            <NavbarSelect />
             <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <SearchIcon />
@@ -142,21 +128,29 @@ class Navbar extends React.Component {
                 }}
               />
             </div>
-            <CButton color="primary" size="sm" children={"Ello mate"} />
+            <div className={classes.grow} />
             <Button
               variant="outlined"
               size="small"
               color="primary"
-              children="Sign up"
+              children="Sign in"
+              onClick={handleSignInOpen}
+              classes={{
+                root: classes.buttonOver,
+                containedPrimary: classes.buttonOutlinedColorPrimary
+              }}
             />
             <Button
               variant="contained"
               size="small"
               color="primary"
-              children="Sign in"
-              classes={{ root: classes.buttonOver }}
+              children="Sign up"
+              onClick={handleSignUpOpen}
+              classes={{
+                root: classes.buttonOver,
+                containedPrimary: classes.buttonColorPrimary
+              }}
             />
-            <div className={classes.grow} />
             <div className={classes.sectionDesktop}>
               <IconButton color="inherit">
                 <Badge badgeContent={4} color="secondary">

@@ -1,4 +1,11 @@
+import {
+  buttonColorPrimary,
+  buttonOutlinedColorPrimary
+} from "../../generalStyle";
+
 const navbarStyle = theme => ({
+  buttonColorPrimary,
+  buttonOutlinedColorPrimary,
   root: {
     width: "100%"
   },
@@ -79,7 +86,9 @@ const navbarStyle = theme => ({
     borderRadius: theme.shape.borderRadius
   },
   buttonOver: {
-    padding: "5px 10px"
+    width: 120,
+    padding: "5px 10px",
+    marginLeft: 10
   }
 });
 

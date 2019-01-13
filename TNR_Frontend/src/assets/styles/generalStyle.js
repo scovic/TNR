@@ -17,6 +17,7 @@
 // ##############################
 // // // Variables - Styles that are used on more than one component
 // #############################
+import { fade } from "@material-ui/core/styles/colorManipulator";
 
 const drawerWidth = 260;
 
@@ -85,7 +86,9 @@ const defaultFont = {
   lineHeight: "1.5em"
 };
 
-const primaryColor = "#9c27b0";
+const primaryColor = "#00a0e6";
+const primaryColorHover = "#00bee6";
+const secondaryColor = "#ff311d";
 const warningColor = "#ff9800";
 const dangerColor = "#f44336";
 const successColor = "#4caf50";
@@ -254,8 +257,57 @@ const cardLink = {
   }
 };
 
+const buttonColorPrimary = {
+  backgroundColor: primaryColor,
+  "&:hover": {
+    backgroundColor: primaryColorHover
+  }
+};
+
+const buttonOutlinedColorPrimary = {
+  color: primaryColor,
+  border: `1px solid ${fade(primaryColor, 0.5)}`,
+  "&:hover": {
+    border: `1px solid ${primaryColor}`
+  }
+};
+
+const textButton = {
+  padding: 0,
+  paddingBottom: 3,
+  marginLeft: 5,
+  color: primaryColor,
+  "&:hover": {
+    backgroundColor: "inherit",
+    color: primaryColorHover
+  }
+};
+
+const iconButton = {
+  borderRadius: "10%"
+};
+
+const primaryIconButton = {
+  ...iconButton,
+  "&:hover": {
+    color: primaryColor
+  }
+};
+
+const secondaryIconButton = {
+  ...iconButton,
+  "&:hover": {
+    color: secondaryColor
+  }
+};
+
 export {
   //variables
+  primaryIconButton,
+  secondaryIconButton,
+  textButton,
+  buttonColorPrimary,
+  buttonOutlinedColorPrimary,
   drawerWidth,
   drawerMiniWidth,
   transition,
@@ -265,6 +317,8 @@ export {
   card,
   defaultFont,
   primaryColor,
+  primaryColorHover,
+  secondaryColor,
   warningColor,
   dangerColor,
   successColor,
@@ -297,5 +351,6 @@ export {
   title,
   cardTitle,
   cardSubtitle,
-  cardLink
+  cardLink,
+  iconButton
 };
