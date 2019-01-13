@@ -36,6 +36,8 @@ class PostRoutes {
         .then(resp => this.neo4j.createRelationship2Nodes('Community', 'Post', community, post, 'HAS_POST'))
         .then(resp => res.status(201).send({ status: 'Post created' }))
         .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
 
@@ -47,6 +49,8 @@ class PostRoutes {
       this.neo4j.deleteNode('Post', post)
         .then(result => res.status(200).send({ status: 'Deleted' }))
         .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
 
@@ -61,16 +65,23 @@ class PostRoutes {
       this.neo4j.updateNode('Post', idToFind, post)
         .then(result => res.status(200).send({ status: 'Updated successfully.' }))
         .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
 
-  voteUp (req, res, next) {
+  vote (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      const post = req.body
+      const post = req.body.post
+      const vote = req.body.vote // 0 - incr, 1 - decr
 
       this.neo4j.findNode('Post', post)
-        .then()// incr upvotes then update
+        .then(resp => { // incr upvotes then update
+          
+        })
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
 }

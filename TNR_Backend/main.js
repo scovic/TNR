@@ -63,10 +63,10 @@ class Main {
       }
     },
     {
-      route: '/posts/upVote',
+      route: '/posts/vote',
       method: 'put',
       onRequest: (req, res, next) => {
-        this.postRoutes.voteUp(req, res, next)
+        this.postRoutes.vote(req, res, next)
       }
     }]
   }
