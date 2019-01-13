@@ -14,11 +14,18 @@ const neo4jPort = process.env.NEO4J_PORT || 7474
 const neo4jUsername = process.env.NEO4J_USERNAME || ''
 const neo4jPassword = process.env.NEO4J_PASSWORD || ''
 
+const redisHost = process.env.REDIS_HOST || 'localhost'
+const redisPort = process.env.REDIS_PORT || 6379
+
 module.exports = {
   neo4j: {
     host: neo4jHost,
     port: neo4jPort,
     username: neo4jUsername,
     password: neo4jPassword
+  },
+  redis: {
+    host: redisHost,
+    port: redisPort
   }
 }
