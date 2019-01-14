@@ -42,5 +42,53 @@ class CommentRoutes {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
+
+  deleteComment (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const objToDelete = req.body // obj must have id
+
+      this.neo4j.deleteNode('Comment', objToDelete)
+        .then(result => res.status(200).send({ status: 'Deleted' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  updateComment (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const objectToUpdate = req.body // must have id
+      const idToFind = {
+        id: objectToUpdate.id
+      }
+
+      this.neo4j.updateNode('Comment', idToFind, objectToUpdate)
+        .then(result => res.status(200).send({ status: 'Updated successfully.' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  vote (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const obj = req.body.objectToVote
+      const vote = req.body.vote.status // 0 - incr, 1 - decr
+
+      this.neo4j.findNode('Comment', obj)
+        .then(resp => {
+          let votes = resp.records[0].get(0).properties.upvotes
+          vote === 0 ? ++votes : --votes
+          this.neo4j.updateNode('Comment', obj, { upvotes: votes })
+        })
+        .then(resp => res.status(200).send({ status: 'Comment votes updated.' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
 }
 module.exports.CommentRoutes = CommentRoutes

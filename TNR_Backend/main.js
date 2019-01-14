@@ -5,7 +5,6 @@ const Redis = require('./db/redis/redis-service').RedisService
 const EntryRoutes = require('./routes/entry-routes').EntryRoutes
 const PostRoutes = require('./routes/post-routes').PostRoutes
 const CommentRoutes = require('./routes/comment-routes').CommentRoutes
-const MainRoutes = require('./routes/main-routes').MainRoutes
 const CommunityRoutes = require('./routes/community-routes').CommunityRoutes
 
 class Main {
@@ -61,28 +60,25 @@ class Main {
       route: '/posts/delete',
       method: 'delete',
       onRequest: (req, res, next) => {
-        const label = 'Post'
-        this.mainRoutes.deleteOne(req, res, next, label)
+        this.postRoutes.deletePost(req, res, next)
       }
     },
     {
       route: '/posts/update',
       method: 'put',
       onRequest: (req, res, next) => {
-        const label = 'Post'
-        this.mainRoutes.updateOne(req, res, next, label)
+        this.postRoutes.updatePost(req, res, next)
       }
     },
     {
       route: '/posts/vote',
       method: 'put',
       onRequest: (req, res, next) => {
-        const label = 'Post'
-        this.mainRoutes.vote(req, res, next, label)
+        this.postRoutes.vote(req, res, next)
       }
     },
     {
-      route: '/user/:id/commented-posts',
+      route: '/user/commented-posts',
       method: 'get',
       onRequest: (req, res, next) => {
         this.commentRoutes.getAllUserCommentedPosts(req, res, next)
@@ -92,24 +88,21 @@ class Main {
       route: '/comments/vote',
       method: 'put',
       onRequest: (req, res, next) => {
-        const label = 'Comment'
-        this.mainRoutes.vote(req, res, next, label)
+        this.commentRoutes.vote(req, res, next)
       }
     },
     {
       route: '/comments/delete',
       method: 'delete',
       onRequest: (req, res, next) => {
-        const label = 'Comment'
-        this.mainRoutes.deleteOne(req, res, next, label)
+        this.commentRoutes.deleteComment(req, res, next)
       }
     },
     {
       route: '/comments/update',
       method: 'put',
       onRequest: (req, res, next) => {
-        const label = 'Comment'
-        this.mainRoutes.updateOne(req, res, next, label)
+        this.commentRoutes.updateComment(req, res, next)
       }
     },
     {
@@ -123,24 +116,21 @@ class Main {
       route: '/community/delete',
       method: 'delete',
       onRequest: (req, res, next) => {
-        const label = 'Community'
-        this.mainRoutes.deleteOne(req, res, next, label)
+        this.communityRoutes.deleteCommunity(req, res, next)
       }
     },
     {
       route: '/community/update',
       method: 'put',
       onRequest: (req, res, next) => {
-        const label = 'Community'
-        this.mainRoutes.updateOne(req, res, next, label)
+        this.communityRoutes.updateCommunity(req, res, next)
       }
     },
     {
       route: '/communities',
       method: 'get',
       onRequest: (req, res, next) => {
-        const label = 'Community'
-        this.mainRoutes.getAll(req, res, next, label)
+        this.communityRoutes.getAllCommunities(req, res, next)
       }
     },
     {
