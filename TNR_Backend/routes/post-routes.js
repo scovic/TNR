@@ -54,5 +54,53 @@ class PostRoutes {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
+
+  deletePost (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const objToDelete = req.body // obj must have id
+
+      this.neo4j.deleteNode('Post', objToDelete)
+        .then(result => res.status(200).send({ status: 'Deleted' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  updatePost (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const objectToUpdate = req.body // must have id
+      const idToFind = {
+        id: objectToUpdate.id
+      }
+
+      this.neo4j.updateNode('Post', idToFind, objectToUpdate)
+        .then(result => res.status(200).send({ status: 'Updated successfully.' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  vote (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const obj = req.body.objectToVote
+      const vote = req.body.vote.status // 0 - incr, 1 - decr
+
+      this.neo4j.findNode('Post', obj)
+        .then(resp => {
+          let votes = resp.records[0].get(0).properties.upvotes
+          vote === 0 ? ++votes : --votes
+          this.neo4j.updateNode('Post', obj, { upvotes: votes })
+        })
+        .then(resp => res.status(200).send({ status: 'Post votes updated.' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
 }
 module.exports.PostRoutes = PostRoutes
