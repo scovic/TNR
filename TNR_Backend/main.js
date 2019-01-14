@@ -1,6 +1,7 @@
 const Server = require('./server').Server
 const Neo4j = require('./db/neo4j/neo4j-module').Neo4j
 const Neo4jService = require('./db/neo4j/neo4j-service').Neo4jService
+const RedisService = require('./db/redis/redis-service').RedisService
 const EntryRoutes = require('./routes/entry-routes').EntryRoutes
 const CustomRoutes = require('./routes/custom-routes').CustomRoutes
 const GeneralRoutes = require('./routes/general-routes').GeneralRoutes
@@ -15,9 +16,10 @@ class Main {
     this.server = new Server(this.serverConfig)
     this.neo4j = new Neo4j(this.dbConfig)
     this.neo4jService = new Neo4jService(this.neo4j)
+    this.redis = new RedisService(this.dbConfig.reds)
     this.entryRoutes = new EntryRoutes(this.neo4j)
-    this.customRoutes = new CustomRoutes(this.neo4j, this.neo4jService)
-    this.generalRoutes = new GeneralRoutes(this.neo4j, this.neo4jService)
+    this.customRoutes = new CustomRoutes(this.neo4j, this.neo4jService, this.redis)
+    this.generalRoutes = new GeneralRoutes(this.neo4j, this.neo4jService, this.redis)
 
     this.bindToWebServer()
     this.server.start()
@@ -144,7 +146,8 @@ class Main {
       onRequest: (req, res, next) => {
         this.customRoutes.addCommunity(req, res, next)
       }
-    }]
+    }  
+  ]
   }
 }
 module.exports.Main = Main

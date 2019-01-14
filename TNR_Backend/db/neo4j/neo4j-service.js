@@ -7,7 +7,7 @@ class Neo4jService {
     return this.neo4jModule.findNode(label, obj.post)
       .then(resp => {
         let votes = resp.records[0].get(0).properties.upvotes // 0 - incr, 1 - decr
-        obj.vote.status === 0 ? ++votes : --votes
+        obj.vote.action === 0 ? ++votes : --votes
         this.neo4jModule.updateNode(label, obj.post, { upvotes: votes })
       })
       .then(resp => resp)
