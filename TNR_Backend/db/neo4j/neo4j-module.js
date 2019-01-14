@@ -4,8 +4,8 @@ class Neo4j {
   constructor (dbConfig) {
     this.dbConfig = dbConfig
 
-    this.driver = neo4j.driver(`bolt://${this.dbConfig.neo4j.host}:${this.dbConfig.neo4j.port}`,
-      neo4j.auth.basic(this.dbConfig.neo4j.username, this.dbConfig.neo4j.password))
+    this.driver = neo4j.driver(`bolt://${this.dbConfig.host}:${this.dbConfig.port}`,
+      neo4j.auth.basic(this.dbConfig.username, this.dbConfig.password))
     this.session = this.driver.session()
   }
 

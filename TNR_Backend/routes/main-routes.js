@@ -1,6 +1,7 @@
 class MainRoutes {
-  constructor (neo4j) {
+  constructor (neo4j, redis) {
     this.neo4j = neo4j
+    this.redis = redis
   }
 
   deleteOne (req, res, next, labelToDelete) {

@@ -2,8 +2,9 @@ const jwtDecode = require('jwt-decode')
 const jwtService = require('../services/jwt-service')
 
 class PostRoutes {
-  constructor (neo4j) {
+  constructor (neo4j, redis) {
     this.neo4j = neo4j
+    this.redis = redis
   }
 
   getAllCommunityPosts (req, res, next) {

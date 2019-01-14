@@ -1,6 +1,7 @@
 class CommunityRoutes {
-  constructor (neo4j) {
+  constructor (neo4j, redis) {
     this.neo4j = neo4j
+    this.redis = redis
   }
 
   addCommunity (req, res, next) {

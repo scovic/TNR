@@ -1,6 +1,7 @@
 class CommentRoutes {
-  constructor (neo4j) {
+  constructor (neo4j, redis) {
     this.neo4j = neo4j
+    this.redis = redis
   }
 
   getAllUserCommentedPosts (req, res, next) {
