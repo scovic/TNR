@@ -1,10 +1,9 @@
 const Server = require('./server').Server
 const Neo4j = require('./db/neo4j/neo4j-module').Neo4j
+const Neo4jService = require('./db/neo4j/neo4j-service').Neo4jService
 const EntryRoutes = require('./routes/entry-routes').EntryRoutes
-const PostRoutes = require('./routes/post-routes').PostRoutes
-const CommentRoutes = require('./routes/comment-routes').CommentRoutes
-const MainRoutes = require('./routes/main-routes').MainRoutes
-const CommunityRoutes = require('./routes/community-routes').CommunityRoutes
+const CustomRoutes = require('./routes/custom-routes').CustomRoutes
+const GeneralRoutes = require('./routes/general-routes').GeneralRoutes
 
 class Main {
   constructor (serverConfig, dbConfig) {
@@ -15,11 +14,10 @@ class Main {
   start () {
     this.server = new Server(this.serverConfig)
     this.neo4j = new Neo4j(this.dbConfig)
+    this.neo4jService = new Neo4jService(this.neo4j)
     this.entryRoutes = new EntryRoutes(this.neo4j)
-    this.postRoutes = new PostRoutes(this.neo4j)
-    this.commentRoutes = new CommentRoutes(this.neo4j)
-    this.mainRoutes = new MainRoutes(this.neo4j)
-    this.communityRoutes = new CommunityRoutes(this.neo4j)
+    this.customRoutes = new CustomRoutes(this.neo4j, this.neo4jService)
+    this.generalRoutes = new GeneralRoutes(this.neo4j, this.neo4jService)
 
     this.bindToWebServer()
     this.server.start()
@@ -44,14 +42,14 @@ class Main {
       route: '/posts/:community',
       method: 'get',
       onRequest: (req, res, next) => {
-        this.postRoutes.getAllCommunityPosts(req, res, next)
+        this.customRoutes.getAllCommunityPosts(req, res, next)
       }
     },
     {
       route: '/posts/add-new',
       method: 'post',
       onRequest: (req, res, next) => {
-        this.postRoutes.addPost(req, res, next)
+        this.customRoutes.addPost(req, res, next)
       }
     },
     {
@@ -59,7 +57,7 @@ class Main {
       method: 'delete',
       onRequest: (req, res, next) => {
         const label = 'Post'
-        this.mainRoutes.deleteOne(req, res, next, label)
+        this.generalRoutes.deleteOne(req, res, next, label)
       }
     },
     {
@@ -67,7 +65,7 @@ class Main {
       method: 'put',
       onRequest: (req, res, next) => {
         const label = 'Post'
-        this.mainRoutes.updateOne(req, res, next, label)
+        this.generalRoutes.updateOne(req, res, next, label)
       }
     },
     {
@@ -75,14 +73,14 @@ class Main {
       method: 'put',
       onRequest: (req, res, next) => {
         const label = 'Post'
-        this.mainRoutes.vote(req, res, next, label)
+        this.generalRoutes.vote(req, res, next, label)
       }
     },
     {
       route: '/user/:id/commented-posts',
       method: 'get',
       onRequest: (req, res, next) => {
-        this.commentRoutes.getAllUserCommentedPosts(req, res, next)
+        this.customRoutes.getAllUserCommentedPosts(req, res, next)
       }
     },
     {
@@ -90,7 +88,7 @@ class Main {
       method: 'put',
       onRequest: (req, res, next) => {
         const label = 'Comment'
-        this.mainRoutes.vote(req, res, next, label)
+        this.generalRoutes.vote(req, res, next, label)
       }
     },
     {
@@ -98,7 +96,7 @@ class Main {
       method: 'delete',
       onRequest: (req, res, next) => {
         const label = 'Comment'
-        this.mainRoutes.deleteOne(req, res, next, label)
+        this.generalRoutes.deleteOne(req, res, next, label)
       }
     },
     {
@@ -106,14 +104,14 @@ class Main {
       method: 'put',
       onRequest: (req, res, next) => {
         const label = 'Comment'
-        this.mainRoutes.updateOne(req, res, next, label)
+        this.generalRoutes.updateOne(req, res, next, label)
       }
     },
     {
       route: '/comments/add-new',
       method: 'post',
       onRequest: (req, res, next) => {
-        this.commentRoutes.addComment(req, res, next)
+        this.customRoutes.addComment(req, res, next)
       }
     },
     {
@@ -121,7 +119,7 @@ class Main {
       method: 'delete',
       onRequest: (req, res, next) => {
         const label = 'Community'
-        this.mainRoutes.deleteOne(req, res, next, label)
+        this.generalRoutes.deleteOne(req, res, next, label)
       }
     },
     {
@@ -129,7 +127,7 @@ class Main {
       method: 'put',
       onRequest: (req, res, next) => {
         const label = 'Community'
-        this.mainRoutes.updateOne(req, res, next, label)
+        this.generalRoutes.updateOne(req, res, next, label)
       }
     },
     {
@@ -137,14 +135,14 @@ class Main {
       method: 'get',
       onRequest: (req, res, next) => {
         const label = 'Community'
-        this.mainRoutes.getAll(req, res, next, label)
+        this.generalRoutes.getAllByType(req, res, next, label)
       }
     },
     {
       route: '/community/add-new',
       method: 'post',
       onRequest: (req, res, next) => {
-        this.communityRoutes.addCommunity(req, res, next)
+        this.customRoutes.addCommunity(req, res, next)
       }
     }]
   }

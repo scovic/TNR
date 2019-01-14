@@ -1,6 +1,7 @@
 const fs = require('fs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+const jwtDecode = require('jwt-decode')
 
 const privateKey = fs.readFileSync('certs/private.key', 'utf8')
 const publicKey = fs.readFileSync('certs/public.key', 'utf8')
@@ -40,6 +41,12 @@ const jwtVerify = (username, token) => {
   return legit
 }
 
+const verifyToken = (token) => {
+  const decodedToken = jwtDecode(token)
+  const legit = jwtVerify(decodedToken.userId, token)
+  console.log(legit)
+}
+
 const genRandomString = (length) => {
   return crypto.randomBytes(Math.ceil(length / 2))
     .toString('hex')
@@ -60,5 +67,6 @@ module.exports = {
   jwtSign: jwtSign,
   jwtVerify: jwtVerify,
   genRandomString: genRandomString,
-  sha512: sha512
+  sha512: sha512,
+  verifyToken
 }
