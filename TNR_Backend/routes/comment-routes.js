@@ -26,7 +26,8 @@ class CommentRoutes {
       const post = req.body.post // post it belongs to
       const user = req.body.user // which user added it
 
-      this.neo4j.createNode('Comment', comment)
+      this.redis.add(user.id, "comments", post.id)
+        .then(() =>  this.neo4j.createNode('Comment', comment))
         .then(resp => {
           let commentId = { id: resp.records[0].get(0).identity.low }
           comment.id = commentId.id

@@ -43,6 +43,7 @@ class PostRoutes {
         .then(resp => {
           let postId = { id: resp.records[0].get(0).identity.low }
           post.id = postId.id
+          this.redis.add(user.id, "posts", post.id)
           return this.neo4j.createRelationship2Nodes('Post', 'User', post, user, 'PUBLISHED_BY')
         })
         .then(resp => this.neo4j.createRelationship2Nodes('User', 'Post', user, post, 'PUBLISHED'))
