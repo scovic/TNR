@@ -113,7 +113,7 @@ class Neo4j {
     const { id, ...obj1NoId } = obj1 // omit id from ob1
     const id2 = obj2.id
     const obj2NoId = Object.keys(obj2).reduce((acc, key) => {
-      if (key !== 'id') { return { ...acc, [key]: obj2[key] } }
+      if (key !== 'id') { return { ...acc, [key]: obj2[key] } } else return acc
     }, {}) // delete id property 'cuz query would look for n1.id BUT it should be a func ID(n1)
 
     const keys1 = Object.keys(obj1NoId)

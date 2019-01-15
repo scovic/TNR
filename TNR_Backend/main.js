@@ -45,7 +45,7 @@ class Main {
       }
     },
     {
-      route: '/posts/:community',
+      route: '/:community',
       method: 'get',
       onRequest: (req, res, next) => {
         this.postRoutes.getAllCommunityPosts(req, res, next)
@@ -101,6 +101,13 @@ class Main {
       }
     },
     {
+      route: '/post-comments',
+      method: 'post',
+      onRequest: (req, res, next) => {
+        this.commentRoutes.getPostComments(req, res, next)
+      }
+    },
+    {
       route: '/comments/update',
       method: 'put',
       onRequest: (req, res, next) => {
@@ -136,10 +143,59 @@ class Main {
       }
     },
     {
+      route: '/user/communities', // premestiti u user-routes
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.communityRoutes.getUserCommunities(req, res, next)
+      }
+    },
+    {
       route: '/community/add-new',
       method: 'post',
       onRequest: (req, res, next) => {
         this.communityRoutes.addCommunity(req, res, next)
+      }
+    },
+    {
+      route: '/user/:user',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAll(req, res, next)
+      }
+    },
+    {
+      route: '/user/:user/posts',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserPosts(req, res, next)
+      }
+    },
+    {
+      route: '/user/:user/upvoted',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserUpvotedPosts(req, res, next)
+      }
+    },
+    {
+      route: '/user/:user/downvoted',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserDownvotedPosts(req, res, next)
+      }
+    },
+    {
+      route: '/user/:user/saved',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserSavedPosts(req, res, next)
+      }
+    },
+    {
+      route: '/user/savePost',
+      method: 'post',
+      onRequest: (req, res, next) => {
+        this.userRoutes.savePost(req, res, next)
       }
     }]
   }

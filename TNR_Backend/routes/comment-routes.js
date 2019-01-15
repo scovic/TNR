@@ -2,16 +2,18 @@ const jwtDecode = require('jwt-decode')
 const jwtService = require('../services/jwt-service')
 
 class CommentRoutes {
-  constructor (neo4j, redis) {
+  constructor (neo4j, neo4jService, redis) {
     this.neo4j = neo4j
+    this.neo4jService = neo4jService
     this.redis = redis
   }
 
   getAllUserCommentedPosts (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const token = jwtDecode(header.slice(7))
       const userId = {
-        id: req.params.id
+        id: token.userId
       }
 
       this.neo4j.selectRelationship3ByNode1('User', 'Comment', 'Post', userId, 'COMMENTED', 'ON_POST')
@@ -94,6 +96,21 @@ class CommentRoutes {
     }
   }
 
-  
+  getPostComments (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const token = header.slice(7)
+      const legit = jwtService.verifyToken(token)
+      if (legit) {
+        this.neo4j.selectRelationshipByNode2('Comment', 'Post', 'ON_POST', { id: req.body.post }) // get all node1(posts) by relationship
+          .then(result => res.status(200).send(result.records))
+          .catch(e => res.status(400).send(e))
+      } else {
+        res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+      }
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
 }
 module.exports.CommentRoutes = CommentRoutes
