@@ -1,3 +1,6 @@
+const jwtDecode = require('jwt-decode')
+const jwtService = require('../services/jwt-service')
+
 class CommentRoutes {
   constructor (neo4j, redis) {
     this.neo4j = neo4j
@@ -90,5 +93,7 @@ class CommentRoutes {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
+
+  
 }
 module.exports.CommentRoutes = CommentRoutes

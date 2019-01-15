@@ -88,10 +88,14 @@ class PostRoutes {
   vote (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const token = header.slice(7)
+      const decodedToken = jwtDecode(token)
+      const id = decodedToken.userId 
       const obj = req.body.objectToVote
       const vote = req.body.vote.status // 0 - incr, 1 - decr
 
-      this.neo4j.findNode('Post', obj)
+      this.redis.add(id, vote === 0 ? "upvotes" : "downvotes", obj.id)
+        .then(() => this.neo4j.findNode('Post', obj))
         .then(resp => {
           let votes = resp.records[0].get(0).properties.upvotes
           vote === 0 ? ++votes : --votes

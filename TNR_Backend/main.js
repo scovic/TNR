@@ -6,6 +6,7 @@ const EntryRoutes = require('./routes/entry-routes').EntryRoutes
 const PostRoutes = require('./routes/post-routes').PostRoutes
 const CommentRoutes = require('./routes/comment-routes').CommentRoutes
 const CommunityRoutes = require('./routes/community-routes').CommunityRoutes
+const UserRoutes = require('./routes/user-routes').UserRoutes
 
 class Main {
   constructor (serverConfig, dbConfig) {
@@ -19,9 +20,10 @@ class Main {
     this.neo4jService = new Neo4jService(this.neo4j)
     this.redis = new Redis(this.dbConfig.redis)
     this.entryRoutes = new EntryRoutes(this.neo4j)
-    this.postRoutes = new PostRoutes(this.neo4j, this.redis)
-    this.commentRoutes = new CommentRoutes(this.neo4j, this.redis)
-    this.communityRoutes = new CommunityRoutes(this.neo4j, this.redis)
+    this.postRoutes = new PostRoutes(this.neo4j, this.neo4jService, this.redis)
+    this.commentRoutes = new CommentRoutes(this.neo4j, this.neo4jService, this.redis)
+    this.communityRoutes = new CommunityRoutes(this.neo4j, this.neo4jService, this.redis)
+    this.userRoutes = new UserRoutes(redis)
 
     this.bindToWebServer()
     this.server.start()

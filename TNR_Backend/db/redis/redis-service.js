@@ -6,39 +6,49 @@ class RedisService {
   }
 
   async add (key, field, value) {
-    let exists = await this.redis.exists(key, field)
+    let exists = this.redis.exists(key, field)
 
     // ne postoji u bazi
     if (exists === 0) {
-      return await this.redis.add(key, field, value)
+      return this.redis.add(key, field, value)
     } else {
       let fieldValue = await this.redis.get(key, field)
       let array = fieldValue.split(',')
       array.push(value)
       let newFieldValue = array.toString()
-      return await this.redis.add(key, field, newFieldValue)
+      return this.redis.add(key, field, newFieldValue)
     }
   }
 
   async getOne (key, field) {
     let fieldValue = await this.redis.get(key, field)
-    return { [field]: fieldValue.split(',') }
+  
+    if (fieldValue) {
+      return { [field]: fieldValue.split(',') } 
+    } else {
+      return { [field]: [] }
+    }
   }
 
   async getMultiple (key, fieldArray) {
     let fieldValueArray = await this.redis.get(key, fieldArray)
+    
     let jsonObject = fieldArray.reduce((acc, field, index) => {
-      return { ...acc, [field]: fieldValueArray[index].split(',') }
+      if (fieldValueArray[index]) {
+        return { ...acc, [field]: fieldValueArray[index].split(',') }
+      } else {
+        return { ... acc, [field]: []}
+      }
     }, {})
     return jsonObject
   }
 
   async deleteOne (key, field) {
-    return await this.redis.delete(key, field)
+    return this.redis.delete(key, field)
   }
 
   async deleteMultiple (key, fieldArray) {
-    return await this.redis.deleteMultiple(key, fieldArray)
+    return this.redis.deleteMultiple(key, fieldArray)
   }
 }
 
