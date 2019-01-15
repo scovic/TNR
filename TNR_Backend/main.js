@@ -19,9 +19,9 @@ class Main {
     this.neo4jService = new Neo4jService(this.neo4j)
     this.redis = new Redis(this.dbConfig.redis)
     this.entryRoutes = new EntryRoutes(this.neo4j)
-    this.postRoutes = new PostRoutes(this.neo4j, this.redis)
-    this.commentRoutes = new CommentRoutes(this.neo4j, this.redis)
-    this.communityRoutes = new CommunityRoutes(this.neo4j, this.redis)
+    this.postRoutes = new PostRoutes(this.neo4j, this.neo4jService, this.redis)
+    this.commentRoutes = new CommentRoutes(this.neo4j, this.neo4jService, this.redis)
+    this.communityRoutes = new CommunityRoutes(this.neo4j, this.neo4jService, this.redis)
 
     this.bindToWebServer()
     this.server.start()
@@ -99,6 +99,13 @@ class Main {
       }
     },
     {
+      route: '/post-comments',
+      method: 'post',
+      onRequest: (req, res, next) => {
+        this.commentRoutes.getPostComments(req, res, next)
+      }
+    },
+    {
       route: '/comments/update',
       method: 'put',
       onRequest: (req, res, next) => {
@@ -131,6 +138,13 @@ class Main {
       method: 'get',
       onRequest: (req, res, next) => {
         this.communityRoutes.getAllCommunities(req, res, next)
+      }
+    },
+    {
+      route: '/user/communities',
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.communityRoutes.getUserCommunities(req, res, next)
       }
     },
     {

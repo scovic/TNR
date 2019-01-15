@@ -1,9 +1,9 @@
-const jwtDecode = require('jwt-decode')
 const jwtService = require('../services/jwt-service')
 
 class PostRoutes {
-  constructor (neo4j, redis) {
+  constructor (neo4j, neo4jService, redis) {
     this.neo4j = neo4j
+    this.neo4jService = neo4jService
     this.redis = redis
   }
 
@@ -11,11 +11,7 @@ class PostRoutes {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
       const token = header.slice(7)
-      const decoded = jwtDecode(token)
-      if (!decoded) return res.status(403).send({ error: 'Authorization Error. Access Denied.' })
-      if (!decoded.userId) return res.status(403).send({ error: 'Authorization Error. Access Denied.' })
-
-      const legit = jwtService.jwtVerify(decoded.userId, token, res)
+      const legit = jwtService.verifyToken(token)
       if (legit) {
         const community = {
           title: req.params.community
@@ -39,17 +35,12 @@ class PostRoutes {
       const community = req.body.community // community it belongs to
       const user = req.body.user // which user added it
 
-      this.neo4j.createNode('Post', post)
-        .then(resp => {
-          let postId = { id: resp.records[0].get(0).identity.low }
-          post.id = postId.id
-          return this.neo4j.createRelationship2Nodes('Post', 'User', post, user, 'PUBLISHED_BY')
-        })
-        .then(resp => this.neo4j.createRelationship2Nodes('User', 'Post', user, post, 'PUBLISHED'))
-        .then(resp => this.neo4j.createRelationship2Nodes('Post', 'Community', post, community, 'SUBJECT'))
-        .then(resp => this.neo4j.createRelationship2Nodes('Community', 'Post', community, post, 'HAS_POST'))
+      this.neo4jService.createPost(post, user, community)
         .then(resp => res.status(201).send({ status: 'Post created' }))
-        .catch(e => res.status(400).send(e))
+        .catch(e => {
+          console.log(e)
+          res.status(400).send(e)
+        })
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -87,15 +78,7 @@ class PostRoutes {
   vote (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      const obj = req.body.objectToVote
-      const vote = req.body.vote.status // 0 - incr, 1 - decr
-
-      this.neo4j.findNode('Post', obj)
-        .then(resp => {
-          let votes = resp.records[0].get(0).properties.upvotes
-          vote === 0 ? ++votes : --votes
-          this.neo4j.updateNode('Post', obj, { upvotes: votes })
-        })
+      this.neo4jService.updateVotes('Post', req.body)
         .then(resp => res.status(200).send({ status: 'Post votes updated.' }))
         .catch(e => res.status(400).send(e))
     } else {

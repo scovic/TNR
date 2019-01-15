@@ -21,11 +21,12 @@ class EntryRoutes {
     this.neo4j.findNode('User', findCriteria)
       .then(result => {
         const node = result.records[0].get(0).properties
+        const id = result.records[0].get(0).identity.low
         if (node) {
           const salt = node.salt
           const userHash = jwtService.sha512(user.password, salt)
           if (userHash.passwordHash === node.password) {
-            jwtService.jwtSign(node, res)
+            jwtService.jwtSign(id).subscribe(token => res.status(200).send({ access_token: token }))
           } else {
             res.status(401).send({ error: 'Invalid credentials' })
           }

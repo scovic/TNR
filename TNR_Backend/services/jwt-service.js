@@ -2,33 +2,36 @@ const fs = require('fs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const jwtDecode = require('jwt-decode')
+const { bindNodeCallback } = require('rxjs')
 
 const privateKey = fs.readFileSync('certs/private.key', 'utf8')
 const publicKey = fs.readFileSync('certs/public.key', 'utf8')
 
-const jwtSign = (user, res) => {
-  const payload = {
-    userId: user.username
-  }
+function jwtSign (id) {
+  return bindNodeCallback((id, callback) => {
+    const payload = {
+      userId: id
+    }
 
-  const i = 'nevena&stefan_elfak_proj' // token issuer
-  const s = `u/${user.username}` // intended token user
+    const i = 'nevena_stefan->nbp_proj' // token issuer
+    const s = `u/${id}` // intended token user
 
-  const signOptions = {
-    issuer: i,
-    subject: s,
-    expiresIn: '6h',
-    algorithm: 'RS256'
-  }
+    const signOptions = {
+      issuer: i,
+      subject: s,
+      expiresIn: '6h',
+      algorithm: 'RS256'
+    }
 
-  jwt.sign(payload, privateKey, signOptions, (err, token) => {
-    err ? res.status(400).send(err) : res.status(200).send({ access_token: token })
-  })
+    jwt.sign(payload, privateKey, signOptions, (err, token) => {
+      err ? callback(err) : callback(null, token)
+    })
+  })(id)
 }
 
-const jwtVerify = (username, token) => {
+function jwtVerify (id, token) {
   const i = 'nevena&stefan_elfak_proj' // token issuer
-  const s = `u/${username}` // intended token user
+  const s = `u/${id}` // intended token user
 
   const verifyOptions = {
     issuer: i,
@@ -41,19 +44,19 @@ const jwtVerify = (username, token) => {
   return legit
 }
 
-const verifyToken = (token) => {
+function verifyToken (token) {
   const decodedToken = jwtDecode(token)
   const legit = jwtVerify(decodedToken.userId, token)
   console.log(legit)
 }
 
-const genRandomString = (length) => {
+function genRandomString (length) {
   return crypto.randomBytes(Math.ceil(length / 2))
     .toString('hex')
     .slice(0, length) // return required number of characters
 }
 
-const sha512 = (password, salt) => {
+function sha512 (password, salt) {
   const hash = crypto.createHmac('sha512', salt)
   hash.update(password)
   const value = hash.digest('hex')
