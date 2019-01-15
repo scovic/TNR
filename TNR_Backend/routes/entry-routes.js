@@ -3,9 +3,6 @@ const jwtService = require('../services/jwt-service')
 class EntryRoutes {
   constructor (neo4j) {
     this.neo4j = neo4j
-
-    this.neo4j.createConstraint('User', 'username')
-      .catch(e => console.log(e))
   }
 
   login (req, res, next) {

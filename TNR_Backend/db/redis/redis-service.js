@@ -22,9 +22,9 @@ class RedisService {
 
   async getOne (key, field) {
     let fieldValue = await this.redis.get(key, field)
-  
+
     if (fieldValue) {
-      return { [field]: fieldValue.split(',') } 
+      return { [field]: fieldValue.split(',') }
     } else {
       return { [field]: [] }
     }
@@ -32,12 +32,12 @@ class RedisService {
 
   async getMultiple (key, fieldArray) {
     let fieldValueArray = await this.redis.get(key, fieldArray)
-    
+
     let jsonObject = fieldArray.reduce((acc, field, index) => {
       if (fieldValueArray[index]) {
         return { ...acc, [field]: fieldValueArray[index].split(',') }
       } else {
-        return { ... acc, [field]: []}
+        return { ...acc, [field]: [] }
       }
     }, {})
     return jsonObject

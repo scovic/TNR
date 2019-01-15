@@ -5,10 +5,10 @@ const driver = neo4j.driver(`bolt://${config.neo4j.host}:${config.neo4j.port}`, 
 const session = driver.session()
 
 const createCommunities = () => {
-  session.run('CREATE (c:Community { title : "Engineering", subscribers : "0", rules:"no cursing, no hiting" }) RETURN c')
-  session.run('CREATE (c:Community { title : "IT", subscribers : "0", rules:"no cursing, no hiting" }) RETURN c')
-  session.run('CREATE (c:Community { title : "DevOps", subscribers : "0", rules:"no cursing, no hiting" }) RETURN c')
-  session.run('CREATE (c:Community { title : "Politics", subscribers : "0" , rules:"no cursing, no hiting"}) RETURN c')
+  session.run('CREATE (c:Community { title : "Healthy Habits", subscribers : "0", subject: "health&fitness", rules:"no cursing, no hiting" }) RETURN c')
+  session.run('CREATE (c:Community { title : "IT", subscribers : "0", subject: "it", rules:"no cursing, no hiting" }) RETURN c')
+  session.run('CREATE (c:Community { title : "DevOps", subscribers : "0", subject: "devops", rules:"no cursing, no hiting" }) RETURN c')
+  session.run('CREATE (c:Community { title : "Politics", subscribers : "0" , subject: "politics", rules:"no cursing, no hiting"}) RETURN c')
 }
 
 const createPosts = () => {

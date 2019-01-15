@@ -31,8 +31,8 @@ class CommentRoutes {
       const post = req.body.post // post it belongs to
       const user = req.body.user // which user added it
 
-      this.redis.add(user.id, "comments", post.id)
-        .then(() =>  this.neo4j.createNode('Comment', comment))
+      this.redis.add(user.id, 'comments', post.id)
+        .then(() => this.neo4j.createNode('Comment', comment))
         .then(resp => {
           let commentId = { id: resp.records[0].get(0).identity.low }
           comment.id = commentId.id
@@ -77,18 +77,33 @@ class CommentRoutes {
     }
   }
 
-  vote (req, res, next) {
+  upVote (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      const obj = req.body.objectToVote
-      const vote = req.body.vote.status // 0 - incr, 1 - decr
+      const decodedToken = jwtDecode(header.slice(7))
+      const userId = {
+        id: decodedToken.userId
+      }
+      const comment = req.body.comment // must have id
 
-      this.neo4j.findNode('Comment', obj)
-        .then(resp => {
-          let votes = resp.records[0].get(0).properties.upvotes
-          vote === 0 ? ++votes : --votes
-          this.neo4j.updateNode('Comment', obj, { upvotes: votes })
-        })
+      this.neo4jService.commentUpVote(userId, comment)
+        .then(resp => res.status(200).send({ status: 'Comment votes updated.' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  downVote (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      const decodedToken = jwtDecode(header.slice(7))
+      const userId = {
+        id: decodedToken.userId
+      }
+      const comment = req.body.comment // must have id
+
+      this.neo4jService.commentUpVote(userId, comment)
         .then(resp => res.status(200).send({ status: 'Comment votes updated.' }))
         .catch(e => res.status(400).send(e))
     } else {

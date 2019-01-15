@@ -19,6 +19,12 @@ class Neo4j {
     )
   }
 
+  createIndex (label, property) { // for faster query
+    return this.session.run(
+      `CREATE INDEX ON :${label}(${property})`
+    )
+  }
+
   findNode (label, object) {
     const { id, ...objNoId } = object // delete id property cuz query would look for n1.id BUT it should be a func ID(n1)
     const keys = Object.keys(objNoId)
@@ -29,6 +35,7 @@ class Neo4j {
     })
     id ? query += `ID(node)=${id}` : query = query.slice(0, query.length - 5)
 
+    // can't optimize it to return node.property 'cuz sometimes it only gets an id and should return whole objects
     return this.session.run(
       `MATCH (node: ${label}) WHERE ${query} RETURN node`
     )
@@ -161,7 +168,7 @@ class Neo4j {
     keys.forEach(key => {
       query += `n2.${key} = '${obj2NoId[key]}' AND `
     })
-    id ? query += `ID(n2)=${id}` : query = query.slice(0, query.length - 5)
+    id ? query += `ID(n2)=${id}` : query = query.slice(0, query.length - 5) // to select by id(n2)
 
     return this.session.run(
       `MATCH (n1:${label1})-[r:${relationship}]->(n2:${label2}) WHERE ${query} RETURN n1`

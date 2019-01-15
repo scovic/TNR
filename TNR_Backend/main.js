@@ -17,13 +17,13 @@ class Main {
   start () {
     this.server = new Server(this.serverConfig)
     this.neo4j = new Neo4j(this.dbConfig.neo4j)
-    this.neo4jService = new Neo4jService(this.neo4j)
     this.redis = new Redis(this.dbConfig.redis)
+    this.neo4jService = new Neo4jService(this.neo4j, this.redis)
     this.entryRoutes = new EntryRoutes(this.neo4j)
-    this.postRoutes = new PostRoutes(this.neo4j, this.neo4jService, this.redis)
+    this.postRoutes = new PostRoutes(this.neo4j, this.neo4jService)
     this.commentRoutes = new CommentRoutes(this.neo4j, this.neo4jService, this.redis)
     this.communityRoutes = new CommunityRoutes(this.neo4j, this.neo4jService, this.redis)
-    this.userRoutes = new UserRoutes(redis)
+    this.userRoutes = new UserRoutes(this.redis)
 
     this.bindToWebServer()
     this.server.start()
@@ -73,24 +73,38 @@ class Main {
       }
     },
     {
-      route: '/posts/vote',
+      route: '/posts/upvote',
       method: 'put',
       onRequest: (req, res, next) => {
-        this.postRoutes.vote(req, res, next)
+        this.postRoutes.upVote(req, res, next)
       }
     },
     {
-      route: '/user/commented-posts',
+      route: '/posts/downvote',
+      method: 'put',
+      onRequest: (req, res, next) => {
+        this.postRoutes.downVote(req, res, next)
+      }
+    },
+    {
+      route: '/user/posts/comments', // uradjeno i sa redisom, vidi sta je bolje
       method: 'get',
       onRequest: (req, res, next) => {
         this.commentRoutes.getAllUserCommentedPosts(req, res, next)
       }
     },
     {
-      route: '/comments/vote',
+      route: '/comments/upvote',
       method: 'put',
       onRequest: (req, res, next) => {
-        this.commentRoutes.vote(req, res, next)
+        this.commentRoutes.upVote(req, res, next)
+      }
+    },
+    {
+      route: '/comments/downvote',
+      method: 'put',
+      onRequest: (req, res, next) => {
+        this.commentRoutes.downVote(req, res, next)
       }
     },
     {
@@ -101,7 +115,7 @@ class Main {
       }
     },
     {
-      route: '/post-comments',
+      route: '/post/comments',
       method: 'post',
       onRequest: (req, res, next) => {
         this.commentRoutes.getPostComments(req, res, next)
