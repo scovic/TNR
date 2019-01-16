@@ -11,7 +11,10 @@ class Neo4j {
 
   createNode (label, object) {
     const keys = Object.keys(object)
-    const properties = keys.map(key => `${key}: $${key}`) // seen from neo4j js driver
+    let properties = keys.map(key => `${key}: $${key}`) // seen from neo4j js driver
+
+    const timestamp = 'created_at:TIMESTAMP()'
+    properties = [...properties, timestamp]
 
     return this.session.run(
       `CREATE (node:${label} {${properties}}) RETURN node`,
@@ -104,7 +107,7 @@ class Neo4j {
   getNode1WithMaxRelationship (label1, label2, relationship) { // get nodes who has the most relationship r with n2
     return this.session.run(
       `MATCH (n1:${label1})-[r:${relationship}]->(n2:${label2})
-        RETURN n1, COUNT(r) as count
+        RETURN n1, n2, COUNT(r) as count
         ORDER BY count DESC
         LIMIT 30`
     )
@@ -215,6 +218,16 @@ class Neo4j {
        RETURN ${retQuery}
        LIMIT 30`
     )
+  }
+
+  orderByTimestamp (label1) {
+    return this.session.run(
+      `MATCH (n:${label1}) RETURN a ORDER BY n.created_at LIMIT 20`
+    )
+  }
+
+  customizedQuery (query) {
+    return this.session.run(`${query}`)
   }
 
   deleteRelationship (label1, label2, obj1, obj2, relationship) {

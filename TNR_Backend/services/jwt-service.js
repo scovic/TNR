@@ -7,13 +7,14 @@ const { bindNodeCallback } = require('rxjs')
 const privateKey = fs.readFileSync('certs/private.key', 'utf8')
 const publicKey = fs.readFileSync('certs/public.key', 'utf8')
 
-function jwtSign (id) {
-  return bindNodeCallback((id, callback) => {
+function jwtSign (id, username) {
+  return bindNodeCallback((id, username, callback) => {
     const payload = {
-      userId: id
+      userId: id,
+      username: username
     }
 
-    const i = 'nevena_stefan->nbp_proj' // token issuer
+    const i = '1553315534->nbp_proj' // token issuer
     const s = `u/${id}` // intended token user
 
     const signOptions = {
@@ -26,22 +27,29 @@ function jwtSign (id) {
     jwt.sign(payload, privateKey, signOptions, (err, token) => {
       err ? callback(err) : callback(null, token)
     })
-  })(id)
+  })(id, username)
 }
 
-function jwtVerify (id, token) {
-  const i = 'nevena_stefan->nbp_proj' // token issuer
-  const s = `u/${id}` // intended token user
+function jwtVerify (token, sessionUserId) {
+  return bindNodeCallback((token, sessionUserId, callback) => {
+    const decodedToken = jwtDecode(token)
+    const i = '1553315534->nbp_proj' // token issuer
+    const s = `u/${decodedToken.userId}` // intended token user
 
-  const verifyOptions = {
-    issuer: i,
-    subject: s,
-    expiresIn: '6h',
-    algorithm: ['RS256']
-  }
+    const verifyOptions = {
+      issuer: i,
+      subject: s,
+      expiresIn: '6h',
+      algorithm: ['RS256']
+    }
 
-  const legit = jwt.verify(token, publicKey, verifyOptions)
-  return legit
+    jwt.verify(token, publicKey, verifyOptions, (err, result) => { // check if token is valid
+      if (err) callback(err)
+      if (result) { // now checking for valid, but stolen token
+        (decodedToken.userId !== sessionUserId) ? callback(err) : callback(null, true)
+      }
+    })
+  })(token, sessionUserId)
 }
 
 function genRandomString (length) {

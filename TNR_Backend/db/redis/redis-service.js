@@ -6,17 +6,24 @@ class RedisService {
   }
 
   async add (key, field, value) {
-    let exists = await this.redis.exists(key, field)
+    try {
+      let exists = await this.redis.exists(key, field)
 
-    // ne postoji u bazi
-    if (exists === 0) {
-      return this.redis.add(key, field, value)
-    } else {
-      let fieldValue = await this.redis.get(key, field)
-      let array = fieldValue.split(',')
-      array.push(value)
-      let newFieldValue = array.toString()
-      return this.redis.add(key, field, newFieldValue)
+      // ne postoji u bazi
+      if (exists === 0) {
+        return this.redis.add(key, field, value)
+      } else {
+        let fieldValue = await this.redis.get(key, field)
+        let array = fieldValue.split(',')
+        if (array.indexOf(value) !== -1) {
+          array.push(value)
+        }
+
+        let newFieldValue = array.toString()
+        return this.redis.add(key, field, newFieldValue)
+      }
+    } catch (e) {
+      console.log('redis error: ' + e)
     }
   }
 

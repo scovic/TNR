@@ -55,7 +55,7 @@ class Main {
       route: '/:community',
       method: 'get',
       onRequest: (req, res, next) => {
-        this.postRoutes.getAllCommunityPosts(req, res, next)
+        this.postRoutes.getAllCommunityPosts(req, res, next) // community -> get all posts, users who posted them and number of likes
       }
     },
     {
@@ -94,7 +94,7 @@ class Main {
       }
     },
     {
-      route: '/user/posts/comments',
+      route: '/user/posts/comments', // redis
       method: 'get',
       onRequest: (req, res, next) => {
         this.userRoutes.getAllUserCommentedPosts(req, res, next)
@@ -108,7 +108,7 @@ class Main {
       }
     },
     {
-      route: '/post/community', // get community which post belongs to
+      route: '/post/community', // get community to which post belongs
       method: 'post',
       onRequest: (req, res, next) => {
         this.postRoutes.getCommunity(req, res, next)
@@ -119,13 +119,6 @@ class Main {
       method: 'post',
       onRequest: (req, res, next) => {
         this.commentRoutes.getPostComments(req, res, next)
-      }
-    },
-    {
-      route: '/posts/popular',
-      method: 'get',
-      onRequest: (req, res, next) => {
-        this.postRoutes.getMostLikedPost(req, res, next)
       }
     },
     {
@@ -171,42 +164,42 @@ class Main {
       }
     },
     {
-      route: '/user/:user',
+      route: '/user/:user', // redis
       method: 'get',
       onRequest: (req, res, next) => {
         this.userRoutes.getAll(req, res, next)
       }
     },
     {
-      route: '/user/:user/posts',
+      route: '/user/:user/posts', // redis
       method: 'get',
       onRequest: (req, res, next) => {
         this.userRoutes.getAllUserPosts(req, res, next)
       }
     },
     {
-      route: '/user/:user/upvoted',
+      route: '/user/:user/upvoted', // redis
       method: 'get',
       onRequest: (req, res, next) => {
         this.userRoutes.getAllUserUpvotedPosts(req, res, next)
       }
     },
     {
-      route: '/user/:user/downvoted',
+      route: '/user/:user/downvoted', // redis
       method: 'get',
       onRequest: (req, res, next) => {
         this.userRoutes.getAllUserDownvotedPosts(req, res, next)
       }
     },
     {
-      route: '/user/:user/saved',
+      route: '/user/:user/saved', // redis
       method: 'get',
       onRequest: (req, res, next) => {
         this.userRoutes.getAllUserSavedPosts(req, res, next)
       }
     },
     {
-      route: '/user/savePost',
+      route: '/user/savePost', // redis
       method: 'post',
       onRequest: (req, res, next) => {
         this.userRoutes.savePost(req, res, next)
