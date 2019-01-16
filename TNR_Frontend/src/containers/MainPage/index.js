@@ -1,4 +1,6 @@
 import React from "react";
+import { Route, Switch } from "react-router";
+import { BrowserRouter } from "react-router-dom";
 import withStyles from "@material-ui/core/styles/withStyles";
 
 import GridContainer from "components/Grid/GridContainer";
@@ -7,6 +9,7 @@ import GridItem from "components/Grid/GridItem";
 import Navbar from "./Navbar";
 import SignIn from "./SignIn";
 import SignUp from "./SignUp";
+import UserProfile from "./UserProfile";
 
 import PostList from "./PostList";
 import PostDetails from "./PostList/PostDetails";
@@ -14,9 +17,9 @@ import PostDetails from "./PostList/PostDetails";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 
-import FirstPageStyle from "assets/styles/containers/FirstPage/firstPageStyle";
+import MainPageStyle from "assets/styles/containers/FirstPage/mainPageStyle";
 
-class FirstPage extends React.Component {
+class MainPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -62,9 +65,20 @@ class FirstPage extends React.Component {
           handleSignInOpen={this.handleSignInOpen}
         />
         <GridContainer justify="center">
-          <GridItem xs={12} md={6} style={{ marginTop: 38 }}>
-            <PostList openPost={this.openPost} />
-          </GridItem>
+          <BrowserRouter>
+            <Switch>
+              <Route exact path="/">
+                <GridItem xs={12} md={6} style={{ marginTop: 38 }}>
+                  <PostList openPost={this.openPost} />
+                </GridItem>
+              </Route>
+              <Route path="/user">
+                <GridItem xs={12} md={8} style={{ marginTop: 38 }}>
+                  <UserProfile />
+                </GridItem>
+              </Route>
+            </Switch>
+          </BrowserRouter>
         </GridContainer>
         <Dialog
           open={signIn || signUp}
@@ -98,4 +112,4 @@ class FirstPage extends React.Component {
   }
 }
 
-export default withStyles(FirstPageStyle)(FirstPage);
+export default withStyles(MainPageStyle)(MainPage);

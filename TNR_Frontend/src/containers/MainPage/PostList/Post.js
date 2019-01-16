@@ -120,14 +120,14 @@ class Post extends React.Component {
     );
 
     const textContent = (
-      <React.Fragment>
+      <div onClick={this.handleClick}>
         <div className={classes.titleContainer}>
           <span className={classes.textTitle}>{title}</span>
         </div>
         <div className={classes.textContainer}>
           <span>{content}</span>
         </div>
-      </React.Fragment>
+      </div>
     );
 
     const actions = (
@@ -146,7 +146,7 @@ class Post extends React.Component {
     );
 
     return (
-      <Card className={classes.onePost} onClick={this.handleClick}>
+      <Card className={classes.onePost}>
         <GridContainer>
           <GridItem className={classes.upvotesSection} xs={2}>
             {upvotesSection}

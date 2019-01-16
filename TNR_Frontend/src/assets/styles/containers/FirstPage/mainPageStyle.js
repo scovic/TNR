@@ -1,4 +1,4 @@
-const FirstPageStyle = {
+const MainPageStyle = {
   dialogPostRoot: {
     "&:first-child": {
       paddingTop: 0
@@ -6,4 +6,4 @@ const FirstPageStyle = {
   }
 };
 
-export default FirstPageStyle;
+export default MainPageStyle;
