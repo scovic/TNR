@@ -6,17 +6,17 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 // import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
-import Badge from "@material-ui/core/Badge";
+
 import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 
 import Menu from "@material-ui/core/Menu";
 // import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import MailIcon from "@material-ui/icons/Mail";
-import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
+import AccountIcon from "@material-ui/icons/PermIdentity";
+import BuildIcon from "@material-ui/icons/BuildOutlined";
+import InputIcon from "@material-ui/icons/Input";
 
 import NavbarSelect from "./NavbarSelect";
 
@@ -66,8 +66,9 @@ class Navbar extends React.Component {
         open={isMenuOpen}
         onClose={this.handleMenuClose}
       >
-        <MenuItem onClick={this.handleMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={this.handleMenuClose}>My account</MenuItem>
+        <MenuItem onClick={this.handleMenuClose}>My Profile</MenuItem>
+        <MenuItem onClick={this.handleMenuClose}>User Settings </MenuItem>
+        <MenuItem>Log Out</MenuItem>
       </Menu>
     );
 
@@ -79,27 +80,11 @@ class Navbar extends React.Component {
         open={isMobileMenuOpen}
         onClose={this.handleMobileMenuClose}
       >
-        <MenuItem>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <MailIcon />
-            </Badge>
-          </IconButton>
-          <p>Messages</p>
-        </MenuItem>
-        <MenuItem>
-          <IconButton color="inherit">
-            <Badge badgeContent={11} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-          <p>Notifications</p>
-        </MenuItem>
         <MenuItem onClick={this.handleProfileMenuOpen}>
           <IconButton color="inherit">
-            <AccountCircle />
+            <AccountIcon />
           </IconButton>
-          <p>Profile</p>
+          <p>My Profile</p>
         </MenuItem>
       </Menu>
     );
@@ -152,23 +137,32 @@ class Navbar extends React.Component {
               }}
             />
             <div className={classes.sectionDesktop}>
-              <IconButton color="inherit">
-                <Badge badgeContent={4} color="secondary">
-                  <MailIcon />
-                </Badge>
-              </IconButton>
-              <IconButton color="inherit">
-                <Badge badgeContent={17} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
               <IconButton
-                aria-owns={isMenuOpen ? "material-appbar" : undefined}
-                aria-haspopup="true"
-                onClick={this.handleProfileMenuOpen}
+                classes={{
+                  root: classes.iconbutton
+                }}
                 color="inherit"
               >
-                <AccountCircle />
+                <AccountIcon />
+                <span className={classes.label}>My Profile</span>
+              </IconButton>
+              <IconButton
+                classes={{
+                  root: classes.iconbutton
+                }}
+                color="inherit"
+              >
+                <BuildIcon fontSize="small" />
+                <span className={classes.label}>User Settings</span>
+              </IconButton>
+              <IconButton
+                classes={{
+                  root: classes.iconbutton
+                }}
+                color="inherit"
+              >
+                <InputIcon fontSize="small" />
+                <span className={classes.label}>Log Out</span>
               </IconButton>
             </div>
             <div className={classes.sectionMobile}>

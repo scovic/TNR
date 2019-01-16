@@ -1,11 +1,14 @@
 import {
   buttonColorPrimary,
-  buttonOutlinedColorPrimary
+  buttonOutlinedColorPrimary,
+  iconButton,
+  primaryColor
 } from "../../generalStyle";
 
 const navbarStyle = theme => ({
   buttonColorPrimary,
   buttonOutlinedColorPrimary,
+  iconButton,
   root: {
     width: "100%"
   },
@@ -89,6 +92,17 @@ const navbarStyle = theme => ({
     width: 120,
     padding: "5px 10px",
     marginLeft: 10
+  },
+  iconbutton: {
+    ...iconButton,
+    // ...buttonColorPrimary,
+    padding: 6,
+    marginLeft: 6
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: 300,
+    padding: "0 4px"
   }
 });
 

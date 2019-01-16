@@ -6,8 +6,8 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
 // import Icon from "@material-ui/core/Icon";
-
-// import MenuIcon from "@material-ui/icons/Menu";
+// import IconButton from "@material-ui/core/IconButton";
+// import Android from "@material-ui/icons/Android";
 
 import NavbarSelectStyle from "../../../assets/styles/containers/FirstPage/navbarSelectStyle";
 

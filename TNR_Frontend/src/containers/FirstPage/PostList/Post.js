@@ -15,23 +15,87 @@ import BookmarkIcon from "@material-ui/icons/Bookmark";
 
 import PostStyle from "assets/styles/containers/FirstPage/postStyle";
 
-const mockText =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam at lorem scelerisque, rhoncus purus sed, sollicitudin dui. Duis efficitur, lorem auctor sodales scelerisque, sapien libero fermentum lacus, sed aliquet neque enim in lectus. Duis purus risus, vestibulum vel lectus a, vulputate vestibulum quam. Quisque in vehicula magna. Aliquam fringilla rhoncus tortor in pulvinar. Etiam efficitur urna eget urna dignissim placerat. Morbi ut convallis odio. In vehicula justo in leo pellentesque gravida. Quisque mi nunc, dictum vel aliquam eu, convallis sed nisl.";
-
 class Post extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      id: 3123,
-      upvotes: 16.5,
-      title: "Not much time left",
-      contentType: "text",
-      content: mockText
+      id: 0,
+      upvotes: 0,
+      title: "",
+      contentType: "",
+      content: "",
+      comments: [],
+      community: { name: "test", id: 2 },
+      postedBy: { username: "test", id: 2 }
     };
+    this.handleClick = this.handleClick.bind(this);
   }
+
+  componentDidMount() {
+    const {
+      title,
+      upvotes,
+      content,
+      contentType,
+      id,
+      comments,
+      community,
+      postedBy
+    } = this.props;
+
+    this.setState({
+      title,
+      upvotes,
+      content,
+      contentType,
+      id,
+      comments,
+      community,
+      postedBy
+    });
+  }
+
+  handleClick() {
+    const {
+      title,
+      upvotes,
+      content,
+      contentType,
+      id,
+      comments,
+      community,
+      postedBy
+    } = this.state;
+
+    const { openPost } = this.props;
+
+    const postDetails = {
+      title,
+      upvotes,
+      content,
+      contentType,
+      id,
+      comments,
+      community,
+      postedBy
+    };
+
+    openPost(postDetails);
+  }
+
   render() {
+    const {
+      title,
+      upvotes,
+      content,
+      comments,
+      community,
+      postedBy
+    } = this.state;
     const { classes } = this.props;
-    const { upvotes, content, title } = this.state;
+
+    const upvotesToShow =
+      upvotes > 999 ? `${(upvotes / 1000).toFixed(1)}k` : upvotes;
 
     const upvotesSection = (
       <React.Fragment>
@@ -43,7 +107,7 @@ class Post extends React.Component {
           <ArrowUpIcon style={{ fontSize: 16 }} />
         </IconButton>
         <div className={classes.upvoteContainer}>
-          <span className={classes.upvoteNumber}>{upvotes}k</span>
+          <span className={classes.upvoteNumber}>{upvotesToShow}</span>
         </div>
         <IconButton
           classes={{
@@ -70,7 +134,9 @@ class Post extends React.Component {
       <div className={classes.actionsContainer}>
         <Action
           icon={<CommentsIcon className={classes.actionIcon} />}
-          label="123 Comments"
+          label={
+            comments.length > 0 ? `${comments.length} Comments` : "Comment"
+          }
         />
         <Action
           icon={<BookmarkIcon className={classes.actionIcon} />}
@@ -80,7 +146,7 @@ class Post extends React.Component {
     );
 
     return (
-      <Card>
+      <Card className={classes.onePost} onClick={this.handleClick}>
         <GridContainer>
           <GridItem className={classes.upvotesSection} xs={2}>
             {upvotesSection}
@@ -88,10 +154,10 @@ class Post extends React.Component {
           <GridItem className={classes.contentSection} xs={10}>
             <div className={classes.opInfo}>
               <span className={classes.communityName + " " + classes.hover}>
-                community
+                {community.name}
               </span>
               <span> - Posted by </span>
-              <span className={classes.hover}>OP name</span>
+              <span className={classes.hover}>{postedBy.username}</span>
             </div>
             {textContent}
             {actions}

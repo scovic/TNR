@@ -5,6 +5,9 @@ const actionStyle = {
       cursor: "pointer"
     }
   },
+  nohover: {
+    "&:hover": { cursor: "default" }
+  },
   actionContainer: {
     padding: "4px 4px",
     borderRadius: 4

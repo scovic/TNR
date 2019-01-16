@@ -258,6 +258,7 @@ const cardLink = {
 };
 
 const buttonColorPrimary = {
+  color: "#fff",
   backgroundColor: primaryColor,
   "&:hover": {
     backgroundColor: primaryColorHover

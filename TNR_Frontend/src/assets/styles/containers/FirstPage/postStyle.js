@@ -28,7 +28,7 @@ const postStyle = {
   },
   contentSection: {
     marginTop: 6,
-    marginLeft: "-3.0%"
+    marginLeft: "-4.0%"
   },
   opInfo: {
     padding: "3px 0",
@@ -68,6 +68,14 @@ const postStyle = {
   actionIcon: {
     fontSize: 16,
     marginBottom: -4
+  },
+  onePost: {
+    "&:hover": {
+      border: "1px solid #000",
+      cursor: "pointer"
+      // padding: 0,
+      // margin: 0
+    }
   }
 };
 

@@ -16,7 +16,7 @@ const NavbarSelectStyle = theme => ({
     paddingBottom: 8
   },
   iconSelect: {
-    // marginLeft: -4,
+    marginLeft: -4,
     marginRight: 10
   },
   menuItemRoot: {
