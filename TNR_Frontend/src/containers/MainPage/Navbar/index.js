@@ -1,17 +1,17 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
-// import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
 
 import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 
 import Menu from "@material-ui/core/Menu";
-// import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import MoreIcon from "@material-ui/icons/MoreVert";
 import AccountIcon from "@material-ui/icons/PermIdentity";
@@ -137,15 +137,20 @@ class Navbar extends React.Component {
               }}
             />
             <div className={classes.sectionDesktop}>
-              <IconButton
-                classes={{
-                  root: classes.iconbutton
-                }}
-                color="inherit"
+              <Link
+                style={{ textDecoration: "none", color: "inherit" }}
+                to="/user"
               >
-                <AccountIcon />
-                <span className={classes.label}>My Profile</span>
-              </IconButton>
+                <IconButton
+                  classes={{
+                    root: classes.iconbutton
+                  }}
+                  color="inherit"
+                >
+                  <AccountIcon />
+                  <span className={classes.label}>My Profile</span>
+                </IconButton>
+              </Link>
               <IconButton
                 classes={{
                   root: classes.iconbutton

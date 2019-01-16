@@ -11,13 +11,11 @@ import NavbarSelectStyle from "../../../assets/styles/containers/FirstPage/navba
 class NavbarSelect extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      showByCategory: "popular"
-    };
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(event) {
+    this.props.select(event.target.value);
     this.setState({ [event.target.name]: event.target.value });
   }
 
@@ -31,7 +29,7 @@ class NavbarSelect extends React.Component {
           className={classes.formControl}
         >
           <Select
-            value={this.state.showByCategory}
+            value={this.props.selectedItem}
             onChange={this.handleChange}
             input={
               <OutlinedInput
@@ -42,17 +40,16 @@ class NavbarSelect extends React.Component {
               />
             }
           >
-            <MenuItem classes={{ root: classes.menuItemRoot }} value="popular">
-              Popular
-            </MenuItem>
-            <MenuItem classes={{ root: classes.menuItemRoot }} value="All">
-              All
-            </MenuItem>
+            {this.props.children}
           </Select>
         </FormControl>
       </form>
     );
   }
 }
+
+NavbarSelect.defaultProps = {
+  selectedItem: ""
+};
 
 export default withStyles(NavbarSelectStyle)(NavbarSelect);

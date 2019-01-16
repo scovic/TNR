@@ -8,7 +8,6 @@ import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 
 import SingInStyle from "../../assets/styles/containers/FirstPage/signInStyle";
-// import background from "../../assets/images/bckg.jpg";
 
 class SignIn extends React.Component {
   constructor(props) {
@@ -28,8 +27,6 @@ class SignIn extends React.Component {
 
   handleSignIn() {
     const { username, password } = this.state;
-    console.log(username);
-    console.log(password);
   }
 
   handleKeyDown(event) {

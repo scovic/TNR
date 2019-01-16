@@ -1,6 +1,5 @@
 import React from "react";
 import { Route, Switch } from "react-router";
-import { BrowserRouter } from "react-router-dom";
 import withStyles from "@material-ui/core/styles/withStyles";
 
 import GridContainer from "components/Grid/GridContainer";
@@ -52,7 +51,6 @@ class MainPage extends React.Component {
   }
 
   openPost(postInfo) {
-    console.log(postInfo);
     this.setState({ showPost: true, postDetails: postInfo });
   }
   render() {
@@ -64,21 +62,19 @@ class MainPage extends React.Component {
           handleSignUpOpen={this.handleSignUpOpen}
           handleSignInOpen={this.handleSignInOpen}
         />
-        <GridContainer justify="center">
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/">
-                <GridItem xs={12} md={6} style={{ marginTop: 38 }}>
-                  <PostList openPost={this.openPost} />
-                </GridItem>
-              </Route>
-              <Route path="/user">
-                <GridItem xs={12} md={8} style={{ marginTop: 38 }}>
-                  <UserProfile />
-                </GridItem>
-              </Route>
-            </Switch>
-          </BrowserRouter>
+        <GridContainer style={{ marginTop: 38 }} justify="center">
+          <Switch>
+            <Route exact path="/">
+              <GridItem xs={12} md={6}>
+                <PostList openPost={this.openPost} />
+              </GridItem>
+            </Route>
+            <Route path="/user">
+              <GridItem xs={12} md={8}>
+                <UserProfile openPost={this.openPost} />
+              </GridItem>
+            </Route>
+          </Switch>
         </GridContainer>
         <Dialog
           open={signIn || signUp}

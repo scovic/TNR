@@ -133,6 +133,7 @@ class Post extends React.Component {
     const actions = (
       <div className={classes.actionsContainer}>
         <Action
+          onClick={this.handleClick}
           icon={<CommentsIcon className={classes.actionIcon} />}
           label={
             comments.length > 0 ? `${comments.length} Comments` : "Comment"
