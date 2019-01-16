@@ -29,7 +29,6 @@ class Neo4jService {
       .then(resp => {
         let commentId = { id: resp.records[0].get(0).identity.low }
         comment.id = commentId.id
-        comment.upvotes = 0
         return this.neo4jModule.createRelationship2Nodes('Comment', 'User', comment, user, 'COMMENTED_BY')
       })
       .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Comment', user, comment, 'COMMENTED'))
@@ -50,14 +49,14 @@ class Neo4jService {
 
   postUpVote (userId, user, post) {
     return this.redis.add(userId.toString(), 'upvotes', post.id)
-      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Post', user, post, 'UPVOTED'))
-      .then(resp => this.neo4jModule.createRelationship2Nodes('Post', 'User', post, user, 'UPVOTED_BY'))
+      .then(resp => this.neo4jModule.createRelationship2NodesUnique('User', 'Post', user, post, 'UPVOTED'))
+      .then(resp => this.neo4jModule.createRelationship2NodesUnique('Post', 'User', post, user, 'UPVOTED_BY'))
   }
 
   postDownVote (userId, user, post) {
     return this.redis.add(userId, 'downvotes', post.id)
-      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Post', user, post, 'DOWNVOTED'))
-      .then(resp => this.neo4jModule.createRelationship2Nodes('Post', 'User', post, user, 'DOWNVOTED_BY'))
+      .then(resp => this.neo4jModule.createRelationship2NodesUnique('User', 'Post', user, post, 'DOWNVOTED'))
+      .then(resp => this.neo4jModule.createRelationship2NodesUnique('Post', 'User', post, user, 'DOWNVOTED_BY'))
   }
 }
 

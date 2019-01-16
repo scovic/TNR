@@ -52,40 +52,6 @@ class CommentRoutes {
     }
   }
 
-  upVote (req, res, next) {
-    const header = req.headers.authorization
-    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      const decodedToken = jwtDecode(header.slice(7))
-      const userId = {
-        id: decodedToken.userId
-      }
-      const comment = req.body.comment // must have id
-
-      return this.neo4jService.commentUpVote(userId, comment)
-        .then(resp => res.status(200).send({ status: 'Comment votes updated.' }))
-        .catch(e => res.status(400).send(e))
-    } else {
-      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
-    }
-  }
-
-  downVote (req, res, next) {
-    const header = req.headers.authorization
-    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      const decodedToken = jwtDecode(header.slice(7))
-      const userId = {
-        id: decodedToken.userId
-      }
-      const comment = req.body.comment // must have id
-
-      return this.neo4jService.commentUpVote(userId, comment)
-        .then(resp => res.status(200).send({ status: 'Comment votes updated.' }))
-        .catch(e => res.status(400).send(e))
-    } else {
-      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
-    }
-  }
-
   getPostComments (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {

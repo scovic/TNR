@@ -116,12 +116,6 @@ class Neo4j {
     )
   }
 
-  createRelationshipConstraint (relationship) {
-    return this.session.run(
-      `CREATE UNIQUE ()-[r:${relationship}]->()`
-    )
-  }
-
   createRelationshipGeneral (label1, label2, relationship) {
     return this.session.run(
       `MATCH (n1: ${label1}) WITH n1
@@ -164,7 +158,7 @@ class Neo4j {
       `MATCH (n1: ${label1}) WITH n1
        MATCH (n2: ${label2})
        WHERE ${query}
-       CREATE (n1)-[r:${relationship}]->(n2)
+       MERGE (n1)-[r:${relationship}]->(n2)
        RETURN r`
     )
   }

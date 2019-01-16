@@ -1,4 +1,5 @@
 const jwtDecode = require('jwt-decode')
+const jwtService = require('../services/jwt-service')
 
 class UserRoutes {
   constructor (redis, neo4j) {
@@ -12,9 +13,11 @@ class UserRoutes {
       const token = header.slice(7)
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
-
-      return this.redis.getMultiple(id, 'posts', 'comments', 'upvotes', 'downvotes')
-        .then((result) => res.status(200).send(result))
+      if (jwtService.jwtVerify(id, token)) {
+        return this.redis.getMultiple(id, 'posts', 'comments', 'upvotes', 'downvotes')
+          .then((result) => res.status(200).send(result))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -26,9 +29,11 @@ class UserRoutes {
       const token = header.slice(7)
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
-
-      return this.redis.getOne(id, 'posts')
-        .then((result) => res.status(200).send(result))
+      if (jwtService.jwtVerify(id, token)) {
+        return this.redis.getOne(id, 'posts')
+          .then((result) => res.status(200).send(result))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -40,9 +45,11 @@ class UserRoutes {
       const token = header.slice(7)
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
-
-      return this.redis.getOne(id, 'upvotes')
-        .then((result) => res.status(200).send(result))
+      if (jwtService.jwtVerify(id, token)) {
+        return this.redis.getOne(id, 'upvotes')
+          .then((result) => res.status(200).send(result))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -54,9 +61,11 @@ class UserRoutes {
       const token = header.slice(7)
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
-
-      return this.redis.getOne(id, 'downvotes')
-        .then((result) => res.status(200).send(result))
+      if (jwtService.jwtVerify(id, token)) {
+        return this.redis.getOne(id, 'downvotes')
+          .then((result) => res.status(200).send(result))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -68,9 +77,11 @@ class UserRoutes {
       const token = header.slice(7)
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
-
-      return this.redis.getOne(id, 'comments')
-        .then((result) => res.status(200).send(result))
+      if (jwtService.jwtVerify(id, token)) {
+        return this.redis.getOne(id, 'comments')
+          .then((result) => res.status(200).send(result))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -83,9 +94,11 @@ class UserRoutes {
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
       const postId = req.body.postId
-
-      return this.redis.add(id, 'savedPosts', postId)
-        .then((result) => res.status(200).send(result))
+      if (jwtService.jwtVerify(id, token)) {
+        return this.redis.add(id, 'savedPosts', postId)
+          .then((result) => res.status(200).send(result))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -97,9 +110,11 @@ class UserRoutes {
       const token = header.slice(7)
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
-
-      return this.redis.getOne(id, 'savedPosts')
-        .then((result) => res.status(200).send(result))
+      if (jwtService.jwtVerify(id, token)) {
+        return this.redis.getOne(id, 'savedPosts')
+          .then((result) => res.status(200).send(result))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -113,11 +128,14 @@ class UserRoutes {
       const userId = {
         id: decodedToken.userId
       }
-
-      return this.neo4j.createRelationship2Nodes('User', 'Community', userId, req.body, 'FOLLOWING')
-        .then(() => this.neo4j.createRelationship2Nodes('Community', 'User', req.body, userId, 'SUBSCRIBER'))
-        .then(() => res.status(200).send({ status: 'Success' }))
-        .catch(e => res.status(400).send(e))
+      if (jwtService.jwtVerify(userId.id, token)) {
+        return this.neo4j.createRelationship2Nodes('User', 'Community', userId, req.body, 'FOLLOWING')
+          .then(() => this.neo4j.createRelationship2Nodes('Community', 'User', req.body, userId, 'SUBSCRIBER'))
+          .then(() => res.status(200).send({ status: 'Success' }))
+          .catch(e => res.status(400).send(e))
+      }
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
   }
 
@@ -126,14 +144,11 @@ class UserRoutes {
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
       const token = header.slice(7)
       const decoded = jwtDecode(token)
-      // const legit = jwtService.verifyToken(token)
-      // if (legit) {
-      return this.neo4j.selectRelationshipByNode2('Community', 'User', 'SUBSCRIBER', { id: decoded.userId }) // get all node1(posts) by relationship
-        .then(result => res.status(200).send(result.records))
-        .catch(e => res.status(400).send(e))
-      // } else {
-      // res.status(403).send({ error: 'Authorization Error. Access Denied.' })
-      // }
+      if (jwtService.jwtVerify(decoded, decoded.userId)) {
+        return this.neo4j.selectRelationshipByNode2('Community', 'User', 'SUBSCRIBER', { id: decoded.userId }) // get all node1(posts) by relationship
+          .then(result => res.status(200).send(result.records))
+          .catch(e => res.status(400).send(e))
+      }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -152,8 +167,6 @@ class UserRoutes {
               set = [...set, el._fields]
             }
           })
-          console.log(set)
-          // FILTRIRAJ SET
           res.status(200).send(set)
         })
         .catch(e => res.status(400).send(e))

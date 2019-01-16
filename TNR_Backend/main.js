@@ -108,7 +108,7 @@ class Main {
       }
     },
     {
-      route: '/post/community',
+      route: '/post/community', // get community which post belongs to
       method: 'post',
       onRequest: (req, res, next) => {
         this.postRoutes.getCommunity(req, res, next)
@@ -220,7 +220,7 @@ class Main {
       }
     },
     {
-      route: '/user/recommended/community',
+      route: '/user/recommended',
       method: 'post',
       onRequest: (req, res, next) => {
         this.userRoutes.getRecommendedCommunities(req, res, next)

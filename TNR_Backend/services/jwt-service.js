@@ -44,12 +44,6 @@ function jwtVerify (id, token) {
   return legit
 }
 
-function verifyToken (token) {
-  const decodedToken = jwtDecode(token)
-  const legit = jwtVerify(decodedToken.userId, token)
-  // console.log(legit)
-}
-
 function genRandomString (length) {
   return crypto.randomBytes(Math.ceil(length / 2))
     .toString('hex')
@@ -70,6 +64,5 @@ module.exports = {
   jwtSign: jwtSign,
   jwtVerify: jwtVerify,
   genRandomString: genRandomString,
-  sha512: sha512,
-  verifyToken
+  sha512: sha512
 }
