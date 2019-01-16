@@ -6,7 +6,7 @@ class RedisService {
   }
 
   async add (key, field, value) {
-    let exists = this.redis.exists(key, field)
+    let exists = await this.redis.exists(key, field)
 
     // ne postoji u bazi
     if (exists === 0) {

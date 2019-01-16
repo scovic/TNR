@@ -48,46 +48,16 @@ class Neo4jService {
       .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Community', user, community, 'IS_ADMIN'))
   }
 
-  postUpVote (userId, post) {
-    this.redis.add(userId, 'upvotes', post.id)
-      .then(() => this.neo4j.findNode('Post', post))
-      .then(resp => {
-        let votes = resp.records[0].get(0).properties.upvotes
-        this.neo4jModule.updateNode('Post', post, { upvotes: ++votes })
-      })
-      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Post', userId, post, 'UPVOTED'))
-      .then(resp => this.neo4jModule.createRelationship2Nodes('Post', 'User', post, userId, 'UPVOTED_BY'))
+  postUpVote (userId, user, post) {
+    return this.redis.add(userId.toString(), 'upvotes', post.id)
+      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Post', user, post, 'UPVOTED'))
+      .then(resp => this.neo4jModule.createRelationship2Nodes('Post', 'User', post, user, 'UPVOTED_BY'))
   }
 
-  postDownVote (userId, post) {
-    this.redis.add(userId, 'upvotes', post.id)
-      .then(() => this.neo4j.findNode('Post', post))
-      .then(resp => {
-        let votes = resp.records[0].get(0).properties.upvotes
-        this.neo4jModule.updateNode('Post', post, { upvotes: --votes })
-      })
-      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Post', userId, post, 'DOWNVOTED'))
-      .then(resp => this.neo4jModule.createRelationship2Nodes('Post', 'User', post, userId, 'DOWNVOTED_BY'))
-  }
-
-  commentUpVote (userId, comment) {
-    this.neo4j.findNode('Comment', comment)
-      .then(resp => {
-        let votes = resp.records[0].get(0).properties.upvotes
-        this.neo4jModule.updateNode('Comment', comment, { upvotes: ++votes })
-      })
-      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Comment', userId, comment, 'LIKED_COMMENT'))
-      .then(resp => this.neo4jModule.createRelationship2Nodes('Comment', 'User', comment, userId, 'LIKED_BY'))
-  }
-
-  commentDownVote (userId, comment) {
-    this.neo4j.findNode('Comment', comment)
-      .then(resp => {
-        let votes = resp.records[0].get(0).properties.upvotes
-        this.neo4jModule.updateNode('Comment', comment, { upvotes: --votes })
-      })
-      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Comment', userId, comment, 'DISLIKED_COMMENT'))
-      .then(resp => this.neo4jModule.createRelationship2Nodes('Comment', 'User', comment, userId, 'DISLIKED_BY'))
+  postDownVote (userId, user, post) {
+    return this.redis.add(userId, 'downvotes', post.id)
+      .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Post', user, post, 'DOWNVOTED'))
+      .then(resp => this.neo4jModule.createRelationship2Nodes('Post', 'User', post, user, 'DOWNVOTED_BY'))
   }
 }
 

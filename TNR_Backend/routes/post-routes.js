@@ -12,18 +12,17 @@ class PostRoutes {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
       const token = header.slice(7)
-      const legit = jwtService.verifyToken(token)
-      if (legit) {
-        const community = {
-          title: req.params.community
-        }
-
-        this.neo4j.selectRelationshipByNode2('Post', 'Community', 'SUBJECT', community) // get all node1(posts) by relationship
-          .then(result => res.status(200).send(result.records))
-          .catch(e => res.status(400).send(e))
-      } else {
-        res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+      // const legit = jwtService.verifyToken(token)
+      // if (legit) {
+      const community = {
+        title: req.params.community
       }
+      return this.neo4j.selectRelationshipByNode2('Post', 'Community', 'SUBJECT', community) // get all node1(posts) by relationship
+        .then(result => res.status(200).send(result.records))
+        .catch(e => res.status(400).send(e))
+      // } else {
+      // res.status(403).send({ error: '3.' })
+      // }
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -36,12 +35,9 @@ class PostRoutes {
       const community = req.body.community // community it belongs to
       const user = req.body.user // which user added it
 
-      this.neo4jService.createPost(post, user, community)
+      return this.neo4jService.createPost(post, user, community)
         .then(resp => res.status(201).send({ status: 'Post created' }))
-        .catch(e => {
-          console.log(e)
-          res.status(400).send(e)
-        })
+        .catch(e => res.status(400).send(e))
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })
     }
@@ -52,7 +48,7 @@ class PostRoutes {
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
       const objToDelete = req.body // obj must have id
 
-      this.neo4j.deleteNode('Post', objToDelete)
+      return this.neo4j.deleteNode('Post', objToDelete)
         .then(result => res.status(200).send({ status: 'Deleted' }))
         .catch(e => res.status(400).send(e))
     } else {
@@ -68,7 +64,7 @@ class PostRoutes {
         id: objectToUpdate.id
       }
 
-      this.neo4j.updateNode('Post', idToFind, objectToUpdate)
+      return this.neo4j.updateNode('Post', idToFind, objectToUpdate)
         .then(result => res.status(200).send({ status: 'Updated successfully.' }))
         .catch(e => res.status(400).send(e))
     } else {
@@ -85,7 +81,7 @@ class PostRoutes {
       }
       const post = req.body.post
 
-      this.neo4jService.postUpVote(userId, post)
+      return this.neo4jService.postUpVote(userId.id, userId, post)
         .then(resp => res.status(200).send({ status: 'Post votes updated.' }))
         .catch(e => res.status(400).send(e))
     } else {
@@ -102,8 +98,30 @@ class PostRoutes {
       }
       const post = req.body.post
 
-      this.neo4jService.postDownVote(userId, post)
+      return this.neo4jService.postDownVote(userId.id, userId, post)
         .then(resp => res.status(200).send({ status: 'Post votes updated.' }))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  getMostLikedPost (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      return this.neo4j.getNode1WithMaxRelationship('Post', 'User', 'UPVOTED_BY')
+        .then(resp => res.status(200).send(resp))
+        .catch(e => res.status(400).send(e))
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  getCommunity (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      return this.neo4j.selectRelationshipByNode2('Community', 'Post', 'HAS_POST', req.body)
+        .then(resp => res.status(200).send(resp))
         .catch(e => res.status(400).send(e))
     } else {
       res.status(403).send({ error: 'Authorization Error. Access Denied.' })

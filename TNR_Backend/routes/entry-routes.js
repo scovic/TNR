@@ -15,7 +15,7 @@ class EntryRoutes {
       username: user.username
     }
 
-    this.neo4j.findNode('User', findCriteria)
+    this.neo4j.getNode('User', findCriteria)
       .then(result => {
         const node = result.records[0].get(0).properties
         const id = result.records[0].get(0).identity.low

@@ -25,7 +25,7 @@ class Neo4j {
     )
   }
 
-  findNode (label, object) {
+  getNode (label, object) {
     const { id, ...objNoId } = object // delete id property cuz query would look for n1.id BUT it should be a func ID(n1)
     const keys = Object.keys(objNoId)
     let query = ''
@@ -67,13 +67,13 @@ class Neo4j {
 
   selectAllByLabel (label) {
     return this.session.run(
-      `MATCH (node: ${label}) RETURN node`
+      `MATCH (node: ${label}) RETURN node LIMIT 30`
     )
   }
 
   selectAllNodes () {
     return this.session.run(
-      `MATCH (node) RETURN node`
+      `MATCH (node) RETURN node LIMIT 30`
     )
   }
 
@@ -101,9 +101,24 @@ class Neo4j {
     )
   }
 
+  getNode1WithMaxRelationship (label1, label2, relationship) { // get nodes who has the most relationship r with n2
+    return this.session.run(
+      `MATCH (n1:${label1})-[r:${relationship}]->(n2:${label2})
+        RETURN n1, COUNT(r) as count
+        ORDER BY count DESC
+        LIMIT 30`
+    )
+  }
+
   createConstraint (label, key) {
     return this.session.run(
       `CREATE CONSTRAINT ON (node: ${label}) ASSERT node.${key} IS UNIQUE`
+    )
+  }
+
+  createRelationshipConstraint (relationship) {
+    return this.session.run(
+      `CREATE UNIQUE ()-[r:${relationship}]->()`
     )
   }
 
@@ -171,15 +186,40 @@ class Neo4j {
     id ? query += `ID(n2)=${id}` : query = query.slice(0, query.length - 5) // to select by id(n2)
 
     return this.session.run(
-      `MATCH (n1:${label1})-[r:${relationship}]->(n2:${label2}) WHERE ${query} RETURN n1`
+      `MATCH (n1:${label1})-[r:${relationship}]->(n2:${label2}) WHERE ${query} RETURN n1 LIMIT 30`
     )
   }
 
-  selectRelationship3ByNode1 (lab1, lab2, lab3, obj1, rel1, rel2) { // get all nodes3 by relationships with node1 and node2
+  selectRelationship3ByNode1 (lab1, lab2, lab3, id, rel1, rel2) { // get all nodes3 by relationships with node1 and node2
     return this.session.run(
       `MATCH (n1:${lab1})-[:${rel1}]-(:${lab2})-[:${rel2}]->(n3:${lab3})
-       WHERE ID(n1)=${obj1.id}
-       RETURN n3`
+       WHERE ID(n1)=${id}
+       RETURN n3
+       LIMIT 30`
+    )
+  }
+
+  selectMultipleRelationshipByNode1 (lab1, lab2, lab3, obj, rel1, rel2) { // get all nodes3 by relationships with node1 and node2
+    const { id, ...objNoId } = obj
+    const keys = Object.keys(objNoId)
+    let query = ''
+    let retQuery = ''
+
+    keys.forEach(key => {
+      query += `n1.${key} = '${objNoId[key]}' AND `
+    })
+    id ? query += `ID(n1)=${id}` : query = query.slice(0, query.length - 5) // to select by id(n1)
+
+    keys.forEach(key => {
+      retQuery += `n3.${key}, `
+    })
+    id ? retQuery += `ID(n3)` : retQuery = retQuery.slice(0, query.length - 2)
+
+    return this.session.run(
+      `MATCH (n1:${lab1})-[:${rel1}]->(:${lab2})<-[:${rel2}]-(n3:${lab3})
+       WHERE ${query}
+       RETURN ${retQuery}
+       LIMIT 30`
     )
   }
 

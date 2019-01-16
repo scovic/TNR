@@ -30,7 +30,7 @@ function jwtSign (id) {
 }
 
 function jwtVerify (id, token) {
-  const i = 'nevena&stefan_elfak_proj' // token issuer
+  const i = 'nevena_stefan->nbp_proj' // token issuer
   const s = `u/${id}` // intended token user
 
   const verifyOptions = {
@@ -47,7 +47,7 @@ function jwtVerify (id, token) {
 function verifyToken (token) {
   const decodedToken = jwtDecode(token)
   const legit = jwtVerify(decodedToken.userId, token)
-  console.log(legit)
+  // console.log(legit)
 }
 
 function genRandomString (length) {
