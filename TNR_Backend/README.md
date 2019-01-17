@@ -1,4 +1,4 @@
-# TNR Backend - This is Not Reddit
+# TNR Back-End
 
 ## Installation
 
@@ -57,3 +57,5 @@ redis: {
 * jwt-decode
 * redis
 * rxjs
+
+This project is licensed under the terms of the MIT license.
