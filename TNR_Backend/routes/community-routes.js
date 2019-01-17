@@ -10,7 +10,7 @@ class CommunityRoutes {
   addCommunity (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const community = req.body.community
           const user = req.body.user // admin, who added it
@@ -30,7 +30,7 @@ class CommunityRoutes {
   deleteCommunity (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const objToDelete = req.body // obj must have id
 
@@ -49,7 +49,7 @@ class CommunityRoutes {
   updateCommunity (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const objectToUpdate = req.body // must have id
           const idToFind = {
@@ -71,7 +71,7 @@ class CommunityRoutes {
   getAllCommunities (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           return this.neo4j.selectAllByLabel('Community')
             .then(result => res.status(200).send(result.records))

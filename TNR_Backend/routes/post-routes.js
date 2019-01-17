@@ -11,7 +11,7 @@ class PostRoutes {
   getAllCommunityPosts (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const community = req.params.community
 
@@ -27,14 +27,51 @@ class PostRoutes {
     }
   }
 
+  getAllPosts (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
+        if (result) {
+          return this.neo4jService.getAllPosts()
+            .then(result => res.status(200).send(result))
+            .catch(e => res.status(400).send(e))
+        } else {
+          res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+        }
+      })
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
+  getMostRecentlyAddedPosts (req, res, next) {
+    const header = req.headers.authorization
+    if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
+        if (result) {
+          return this.neo4jService.getMostRecentlyAddedPosts()
+            .then(result => res.status(200).send(result))
+            .catch(e => res.status(400).send(e))
+        } else {
+          res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+        }
+      })
+    } else {
+      res.status(403).send({ error: 'Authorization Error. Access Denied.' })
+    }
+  }
+
   addPost (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const post = req.body.post // post
           const community = req.body.community // community it belongs to
-          const user = req.body.user // which user added it
+          const decodedToken = jwtDecode(header.slice(7))
+          const user = {
+            id: decodedToken.userId
+          }
 
           return this.neo4jService.createPost(post, user, community)
             .then(resp => res.status(201).send({ status: 'Post created' }))
@@ -51,7 +88,7 @@ class PostRoutes {
   deletePost (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const objToDelete = req.body // obj must have id
 
@@ -70,7 +107,7 @@ class PostRoutes {
   updatePost (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const objectToUpdate = req.body // must have id
           const idToFind = {
@@ -92,7 +129,7 @@ class PostRoutes {
   upVote (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const decodedToken = jwtDecode(header.slice(7))
           const userId = {
@@ -115,7 +152,7 @@ class PostRoutes {
   downVote (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const decodedToken = jwtDecode(header.slice(7))
           const userId = {
@@ -138,7 +175,7 @@ class PostRoutes {
   getMostLikedPosts (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           return this.neo4j.getNode1WithMaxRelationship('Post', 'User', 'UPVOTED_BY')
             .then(resp => res.status(200).send(resp))
@@ -155,7 +192,7 @@ class PostRoutes {
   getCommunity (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           return this.neo4j.selectRelationshipByNode2('Community', 'Post', 'HAS_POST', req.body)
             .then(resp => res.status(200).send(resp))

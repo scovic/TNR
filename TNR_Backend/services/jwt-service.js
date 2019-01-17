@@ -15,7 +15,7 @@ function jwtSign (id, username) {
     }
 
     const i = '1553315534->nbp_proj' // token issuer
-    const s = `u/${id}` // intended token user
+    const s = `u/${username}` // intended token user
 
     const signOptions = {
       issuer: i,
@@ -34,7 +34,7 @@ function jwtVerify (token, sessionUserId) {
   return bindNodeCallback((token, sessionUserId, callback) => {
     const decodedToken = jwtDecode(token)
     const i = '1553315534->nbp_proj' // token issuer
-    const s = `u/${decodedToken.userId}` // intended token user
+    const s = `u/${decodedToken.username}` // intended token user
 
     const verifyOptions = {
       issuer: i,
@@ -46,7 +46,7 @@ function jwtVerify (token, sessionUserId) {
     jwt.verify(token, publicKey, verifyOptions, (err, result) => { // check if token is valid
       if (err) callback(err)
       if (result) { // now checking for valid, but stolen token
-        (decodedToken.userId !== sessionUserId) ? callback(err) : callback(null, true)
+        (decodedToken.username !== sessionUserId) ? callback(err) : callback(null, true)
       }
     })
   })(token, sessionUserId)

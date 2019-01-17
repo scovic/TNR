@@ -10,7 +10,7 @@ class CommentRoutes {
   addComment (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const comment = req.body.comment // comment
           const post = req.body.post // post it belongs to
@@ -31,7 +31,7 @@ class CommentRoutes {
   deleteComment (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const objToDelete = req.body // obj must have id
 
@@ -50,7 +50,7 @@ class CommentRoutes {
   updateComment (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const objectToUpdate = req.body // must have id
           const idToFind = {
@@ -72,7 +72,7 @@ class CommentRoutes {
   getPostComments (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
-      jwtService.jwtVerify(header.slice(7), req.session.userId).subscribe(result => {
+      jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           return this.neo4j.selectRelationshipByNode2('Comment', 'Post', 'ON_POST', { id: req.body.post }) // get all node1(posts) by relationship
             .then(result => res.status(200).send(result.records))

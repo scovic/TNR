@@ -6,6 +6,7 @@ class Neo4j {
 
     this.driver = neo4j.driver(`bolt://${this.dbConfig.host}:${this.dbConfig.port}`,
       neo4j.auth.basic(this.dbConfig.username, this.dbConfig.password))
+
     this.session = this.driver.session()
   }
 
@@ -19,13 +20,13 @@ class Neo4j {
     return this.session.run(
       `CREATE (node:${label} {${properties}}) RETURN node`,
       object
-    )
+    ).catch(e => console.log(e))
   }
 
   createIndex (label, property) { // for faster query
     return this.session.run(
       `CREATE INDEX ON :${label}(${property})`
-    )
+    ).catch(e => console.log(e))
   }
 
   getNode (label, object) {
@@ -41,7 +42,7 @@ class Neo4j {
     // can't optimize it to return node.property 'cuz sometimes it only gets an id and should return whole objects
     return this.session.run(
       `MATCH (node: ${label}) WHERE ${query} RETURN node`
-    )
+    ).catch(e => console.log(e))
   }
 
   updateNode (label, objToFind, updatedObj) {
@@ -59,31 +60,31 @@ class Neo4j {
 
     return this.session.run(
       `MATCH (node: ${label}) WHERE ${findQuery} SET ${updateQuery} RETURN node`
-    )
+    ).catch(e => console.log(e))
   }
 
   deleteNode (label, objectToDelete) {
     return this.session.run(
       `MATCH (node: ${label}) WHERE ID(node)=${objectToDelete.id} DETACH DELETE node`
-    )
+    ).catch(e => console.log(e))
   }
 
   selectAllByLabel (label) {
     return this.session.run(
       `MATCH (node: ${label}) RETURN node LIMIT 30`
-    )
+    ).catch(e => console.log(e))
   }
 
   selectAllNodes () {
     return this.session.run(
       `MATCH (node) RETURN node LIMIT 30`
-    )
+    ).catch(e => console.log(e))
   }
 
   countNodesByLabel (label) {
     return this.session.run(
       `MATCH (node:${label}) RETURN count(node) as count`
-    )
+    ).catch(e => console.log(e))
   }
 
   countNodesByCriteria (label, objToFind) {
@@ -101,7 +102,7 @@ class Neo4j {
 
     return this.session.run(
       `MATCH (node:${label}) WHERE ${query} RETURN count(node) as count`
-    )
+    ).catch(e => console.log(e))
   }
 
   getNode1WithMaxRelationship (label1, label2, relationship) { // get nodes who has the most relationship r with n2
@@ -110,13 +111,13 @@ class Neo4j {
         RETURN n1, n2, COUNT(r) as count
         ORDER BY count DESC
         LIMIT 30`
-    )
+    ).catch(e => console.log(e))
   }
 
   createConstraint (label, key) {
     return this.session.run(
       `CREATE CONSTRAINT ON (node: ${label}) ASSERT node.${key} IS UNIQUE`
-    )
+    ).catch(e => console.log(e))
   }
 
   createRelationshipGeneral (label1, label2, relationship) {
@@ -125,7 +126,7 @@ class Neo4j {
        MATCH (n2: ${label2})
        CREATE (n1)-[r:${relationship}]->(n2)
        RETURN r`
-    )
+    ).catch(e => console.log(e))
   }
 
   createRelationship2Nodes (label1, label2, obj1, obj2, relationship) {
@@ -163,13 +164,13 @@ class Neo4j {
        WHERE ${query}
        MERGE (n1)-[r:${relationship}]->(n2)
        RETURN r`
-    )
+    ).catch(e => console.log(e))
   }
 
   countRelationships (label1, label2, relationship) {
     return this.session.run(
       `MATCH (:${label1})-[r:${relationship}]->(:${label2}) RETURN count(r) as count`
-    )
+    ).catch(e => console.log(e))
   }
 
   selectRelationshipByNode2 (label1, label2, relationship, obj2) { // get all nodes1 by relationship with node2
@@ -184,7 +185,7 @@ class Neo4j {
 
     return this.session.run(
       `MATCH (n1:${label1})-[r:${relationship}]->(n2:${label2}) WHERE ${query} RETURN n1 LIMIT 30`
-    )
+    ).catch(e => console.log(e))
   }
 
   selectRelationship3ByNode1 (lab1, lab2, lab3, id, rel1, rel2) { // get all nodes3 by relationships with node1 and node2
@@ -193,7 +194,7 @@ class Neo4j {
        WHERE ID(n1)=${id}
        RETURN n3
        LIMIT 30`
-    )
+    ).catch(e => console.log(e))
   }
 
   selectMultipleRelationshipByNode1 (lab1, lab2, lab3, obj, rel1, rel2) { // get all nodes3 by relationships with node1 and node2
@@ -217,29 +218,30 @@ class Neo4j {
        WHERE ${query}
        RETURN ${retQuery}
        LIMIT 30`
-    )
+    ).catch(e => console.log(e))
   }
 
   orderByTimestamp (label1) {
     return this.session.run(
       `MATCH (n:${label1}) RETURN a ORDER BY n.created_at LIMIT 20`
-    )
+    ).catch(e => console.log(e))
   }
 
   customizedQuery (query) {
     return this.session.run(`${query}`)
+      .catch(e => console.log(e))
   }
 
   deleteRelationship (label1, label2, obj1, obj2, relationship) {
     return this.session.run(
       `MATCH (:${label1} ${obj1})-[r:${relationship}]->(:${label2} ${obj2}) DELETE r`
-    )
+    ).catch(e => console.log(e))
   }
 
   dropDB () {
     return this.session.run(
       'MATCH (n) DETACH DELETE n'
-    )
+    ).catch(e => console.log(e))
   }
 }
 module.exports.Neo4j = Neo4j

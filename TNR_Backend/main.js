@@ -23,7 +23,7 @@ class Main {
     this.postRoutes = new PostRoutes(this.neo4j, this.neo4jService, this.redis)
     this.commentRoutes = new CommentRoutes(this.neo4j, this.neo4jService, this.redis)
     this.communityRoutes = new CommunityRoutes(this.neo4j, this.neo4jService, this.redis)
-    this.userRoutes = new UserRoutes(this.redis, this.neo4j)
+    this.userRoutes = new UserRoutes(this.redis, this.neo4j, this.neo4jService)
 
     this.bindToWebServer()
     this.server.start()
@@ -52,10 +52,24 @@ class Main {
       }
     },
     {
-      route: '/:community',
+      route: '/:community/', // home
       method: 'get',
       onRequest: (req, res, next) => {
-        this.postRoutes.getAllCommunityPosts(req, res, next) // community -> get all posts, users who posted them and number of likes
+        this.postRoutes.getAllCommunityPosts(req, res, next) // get community posts, users who posted them and number of likes
+      }
+    },
+    {
+      route: '/posts/all', // all
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.postRoutes.getAllPosts(req, res, next) // get all posts, users who posted them and number of likes
+      }
+    },
+    {
+      route: '/posts/recent', // all
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.postRoutes.getAllPosts(req, res, next) // get all posts, users who posted them and number of likes
       }
     },
     {
@@ -94,10 +108,10 @@ class Main {
       }
     },
     {
-      route: '/user/posts/comments', // redis
+      route: '/user/overview', // redis gets post ids for posts which user posted, commented, upvoted, downvoted and saved
       method: 'get',
       onRequest: (req, res, next) => {
-        this.userRoutes.getAllUserCommentedPosts(req, res, next)
+        this.userRoutes.getAllUserActivity(req, res, next)
       }
     },
     {
@@ -112,13 +126,6 @@ class Main {
       method: 'post',
       onRequest: (req, res, next) => {
         this.postRoutes.getCommunity(req, res, next)
-      }
-    },
-    {
-      route: '/post/comments',
-      method: 'post',
-      onRequest: (req, res, next) => {
-        this.commentRoutes.getPostComments(req, res, next)
       }
     },
     {
@@ -161,41 +168,6 @@ class Main {
       method: 'get',
       onRequest: (req, res, next) => {
         this.userRoutes.getUserCommunities(req, res, next)
-      }
-    },
-    {
-      route: '/user/:user', // redis
-      method: 'get',
-      onRequest: (req, res, next) => {
-        this.userRoutes.getAll(req, res, next)
-      }
-    },
-    {
-      route: '/user/:user/posts', // redis
-      method: 'get',
-      onRequest: (req, res, next) => {
-        this.userRoutes.getAllUserPosts(req, res, next)
-      }
-    },
-    {
-      route: '/user/:user/upvoted', // redis
-      method: 'get',
-      onRequest: (req, res, next) => {
-        this.userRoutes.getAllUserUpvotedPosts(req, res, next)
-      }
-    },
-    {
-      route: '/user/:user/downvoted', // redis
-      method: 'get',
-      onRequest: (req, res, next) => {
-        this.userRoutes.getAllUserDownvotedPosts(req, res, next)
-      }
-    },
-    {
-      route: '/user/:user/saved', // redis
-      method: 'get',
-      onRequest: (req, res, next) => {
-        this.userRoutes.getAllUserSavedPosts(req, res, next)
       }
     },
     {

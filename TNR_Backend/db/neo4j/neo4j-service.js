@@ -1,3 +1,6 @@
+const { bindNodeCallback } = require('rxjs')
+const { map, flatMap } = require('rxjs/operators')
+
 class Neo4jService {
   constructor (neo4j, redis) {
     this.neo4jModule = neo4j
@@ -13,7 +16,26 @@ class Neo4jService {
   getAllCommunityPosts (communityTitle) {
     const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
                     MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User) WHERE c.title='${communityTitle}'
+                    RETURN u1, p, COUNT(r) as count
+                    LIMIT 30`
+    return this.neo4jModule.customizedQuery(query)
+      .catch(e => console.log(e))
+  }
+
+  getAllPosts () {
+    const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
+                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User)'
                     RETURN u1, p, COUNT(r) as count`
+    return this.neo4jModule.customizedQuery(query)
+      .catch(e => console.log(e))
+  }
+
+  getMostRecentlyAddedPosts () {
+    const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
+                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User)'
+                    RETURN u1, p, COUNT(r) as count
+                    ORDER BY p.created_at DESC
+                    LIMIT 30`
     return this.neo4jModule.customizedQuery(query)
       .catch(e => console.log(e))
   }
@@ -73,6 +95,48 @@ class Neo4jService {
       .then(resp => this.neo4jModule.createRelationship2Nodes('User', 'Post', user, post, 'DOWNVOTED'))
       .then(resp => this.neo4jModule.createRelationship2Nodes('Post', 'User', post, user, 'DOWNVOTED_BY'))
       .catch(e => console.log(e))
+  }
+
+  getAllUserActivityIds (id) {
+    return bindNodeCallback((id, callback) => {
+      return this.redis.getMultiple(id, ['posts', 'comments', 'upvotes', 'downvotes', 'saved'])
+        .then((result) => {
+          const keys = Object.keys(result)
+          let ids = keys.map(key => result[key].map(el => {
+            return {
+              id: el
+            }
+          }))
+          callback(null, ids)
+        })
+    })(id)
+  }
+
+  getAllUserActivityTmp (idsArr) { // ids je niz nizova [arr1, arr2, arr3]
+    return bindNodeCallback((idsArr, callback) => {
+      let count = 0
+      idsArr.forEach(arr => {
+        count += arr.length
+      })
+      let posts = []
+      idsArr.forEach(arr => {
+        return arr.forEach(id => this.neo4jModule.getNode('Post', id)
+          .then(post => {
+            posts.push(post)
+            if (--count === 0) {
+              callback(null, posts)
+            }
+          }))
+      })
+    })(idsArr)
+  }
+
+  getAllUserActivity (id) {
+    const observable = this.getAllUserActivityIds(id).pipe(
+      flatMap(idsArr => this.getAllUserActivityTmp(idsArr)),
+      map(result => result)
+    )
+    return observable
   }
 }
 

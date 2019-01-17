@@ -23,7 +23,7 @@ class EntryRoutes {
           const salt = node.salt
           const userHash = jwtService.sha512(user.password, salt)
           if (userHash.passwordHash === node.password) {
-            req.session.userId = id // keep it in session to compare with token in other routes
+            req.session.username = user.username // keep it in session to compare with token in other routes
             jwtService.jwtSign(id, user.username).subscribe(token => res.status(200).send({ access_token: token }))
           } else {
             res.status(401).send({ error: 'Invalid credentials' })

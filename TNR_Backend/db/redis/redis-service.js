@@ -15,7 +15,7 @@ class RedisService {
       } else {
         let fieldValue = await this.redis.get(key, field)
         let array = fieldValue.split(',')
-        if (array.indexOf(value) !== -1) {
+        if (array.indexOf(value) === -1) {
           array.push(value)
         }
 
@@ -38,16 +38,18 @@ class RedisService {
   }
 
   async getMultiple (key, fieldArray) {
-    let fieldValueArray = await this.redis.get(key, fieldArray)
+    let fieldValueArray = await this.redis.getMultiple(key, fieldArray)
 
-    let jsonObject = fieldArray.reduce((acc, field, index) => {
-      if (fieldValueArray[index]) {
-        return { ...acc, [field]: fieldValueArray[index].split(',') }
-      } else {
-        return { ...acc, [field]: [] }
-      }
-    }, {})
-    return jsonObject
+    if (fieldValueArray) {
+      let jsonObject = fieldArray.reduce((acc, field, index) => {
+        if (fieldValueArray[index]) {
+          return { ...acc, [field]: fieldValueArray[index].split(',') }
+        } else {
+          return { ...acc, [field]: [] }
+        }
+      }, {})
+      return jsonObject
+    } else return []
   }
 
   async deleteOne (key, field) {
