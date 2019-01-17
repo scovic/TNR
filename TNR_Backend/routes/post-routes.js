@@ -27,12 +27,12 @@ class PostRoutes {
     }
   }
 
-  getAllPosts (req, res, next) {
+  getMostPopular (req, res, next) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
       jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
-          return this.neo4jService.getAllPosts()
+          return this.neo4jService.getMostPopular()
             .then(result => res.status(200).send(result))
             .catch(e => res.status(400).send(e))
         } else {

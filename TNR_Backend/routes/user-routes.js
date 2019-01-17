@@ -8,14 +8,15 @@ class UserRoutes {
     this.neo4jService = neo4jService
   }
 
-  getAllUserActivity (req, res, next) {
+  getAllUserActivity (req, res, next, me) {
     const header = req.headers.authorization
     if (header && (header.indexOf('Bearer') !== -1 || header.indexOf('bearer') !== -1) && header.indexOf('undefined') === -1) {
       return jwtService.jwtVerify(header.slice(7), req.session.username).subscribe(result => {
         if (result) {
           const token = header.slice(7)
           const decodedToken = jwtDecode(token)
-          const id = decodedToken.userId
+          let id = ''
+          me ? id = decodedToken.userId : id = req.body.id
           this.neo4jService.getAllUserActivity(id).subscribe(posts => res.status(200).send(posts))
         } else {
           res.status(403).send({ error: 'Authorization Error. Access Denied.' })

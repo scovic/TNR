@@ -22,10 +22,11 @@ class Neo4jService {
       .catch(e => console.log(e))
   }
 
-  getAllPosts () {
+  getMostPopular () {
     const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
                     MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User)'
-                    RETURN u1, p, COUNT(r) as count`
+                    RETURN u1, p, COUNT(r) as count ORDER BY count DESC
+                    LIMIT 30`
     return this.neo4jModule.customizedQuery(query)
       .catch(e => console.log(e))
   }
@@ -112,7 +113,7 @@ class Neo4jService {
     })(id)
   }
 
-  getAllUserActivityTmp (idsArr) { // ids je niz nizova [arr1, arr2, arr3]
+  getAllUserActivityTmp (idsArr) { // ids is an array of arrays for published posts, commented, upvoted etc.
     return bindNodeCallback((idsArr, callback) => {
       let count = 0
       idsArr.forEach(arr => {

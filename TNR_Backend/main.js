@@ -59,17 +59,17 @@ class Main {
       }
     },
     {
-      route: '/posts/all', // all
+      route: '/posts/all', // all - sorted by timestamp
       method: 'get',
       onRequest: (req, res, next) => {
-        this.postRoutes.getAllPosts(req, res, next) // get all posts, users who posted them and number of likes
+        this.postRoutes.getMostRecentlyAddedPosts(req, res, next)
       }
     },
     {
-      route: '/posts/recent', // all
+      route: '/posts/popular', // popular - sorted by likes
       method: 'get',
       onRequest: (req, res, next) => {
-        this.postRoutes.getAllPosts(req, res, next) // get all posts, users who posted them and number of likes
+        this.postRoutes.getMostPopular(req, res, next)
       }
     },
     {
@@ -108,10 +108,17 @@ class Main {
       }
     },
     {
-      route: '/user/overview', // redis gets post ids for posts which user posted, commented, upvoted, downvoted and saved
+      route: '/user/overview', // redis gets post ids for posts which logged in user posted, commented, upvoted, downvoted and saved
       method: 'get',
       onRequest: (req, res, next) => {
-        this.userRoutes.getAllUserActivity(req, res, next)
+        this.userRoutes.getAllUserActivity(req, res, next, true)
+      }
+    },
+    {
+      route: '/user/overview', // redis gets post ids for posts which requested user posted, commented, upvoted, downvoted and saved
+      method: 'post', // for user id
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserActivity(req, res, next, false)
       }
     },
     {
