@@ -1,5 +1,6 @@
 import React from "react";
 import withStyle from "@material-ui/core/styles/withStyles";
+import { signUp } from "services/auth.service";
 
 import GridContainer from "../../components/Grid/GridContainer";
 import GridItem from "../../components/Grid/GridItem";
@@ -28,9 +29,7 @@ class SignUp extends React.Component {
 
   handleSignUp() {
     const { email, username, password } = this.state;
-    console.log(email);
-    console.log(username);
-    console.log(password);
+    signUp(username, password, email).then(() => this.props.handleClose());
   }
 
   handleKeyDown(event) {

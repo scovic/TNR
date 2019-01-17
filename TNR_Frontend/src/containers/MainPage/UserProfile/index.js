@@ -4,6 +4,17 @@ import GridContainer from "components/Grid/GridContainer";
 import GridItem from "components/Grid/GridItem";
 import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
+import { connect } from "react-redux";
+import { SIGNEDIN } from "_state/userState";
+import JwtDecode from "jwt-decode";
+import {
+  getUserOverview,
+  getUserPublishedPosts,
+  getUserUpvotedPosts,
+  getUserDownvotedPosts,
+  getUserSavedPosts,
+  getUserCommentedPosts
+} from "services/general.service";
 
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -16,59 +27,6 @@ import Select from "./Select";
 import AddNewPost from "./AddNewPost";
 
 import UserProfileStyle from "assets/styles/containers/UserProfile/userProfileStyle";
-
-const mockData = [
-  {
-    id: 1,
-    contentType: "text",
-    title: "post 1",
-    content: "This is some content, and so good so far,",
-    upvotes: 132,
-    comments: [],
-    community: {
-      id: 124,
-      name: "someCommunity"
-    },
-    postedBy: {
-      id: 12,
-      username: "crazyHorSe"
-    }
-  },
-  {
-    id: 2,
-    contentType: "text",
-    title: "post 2",
-    content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque consectetur et odio tempor pulvinar. Vivamus lobortis lacinia dui sed facilisis.",
-    upvotes: 1004,
-    comments: [],
-    community: {
-      id: 53,
-      name: "askLinux"
-    },
-    postedBy: {
-      id: 12,
-      username: "icantc#"
-    }
-  },
-  {
-    id: 3,
-    contentType: "text",
-    title: "post 3",
-    content:
-      " Vestibulum rhoncus augue a tortor accumsan finibus. Nullam elementum lectus vel arcu rutrum eleifend. Phasellus dictum sed risus sit amet luctus.",
-    upvotes: 12,
-    comments: [],
-    community: {
-      id: 15,
-      name: "something"
-    },
-    postedBy: {
-      id: 9,
-      username: "popstickle"
-    }
-  }
-];
 
 const Categories = [
   "overview",
@@ -86,7 +44,8 @@ class UserProfile extends React.Component {
       addNewPost: false,
       userInfo: null,
       posts: [],
-      category: ""
+      category: Categories[0],
+      username: JwtDecode(localStorage.getItem("accToken")).username
     };
     this.openPost = this.openPost.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -95,10 +54,128 @@ class UserProfile extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({ posts: mockData, category: Categories[0] });
+    // getUserOverview().then(res => {
+    //   const posts = this.filterPosts(res);
+    //   const noDuplicates = this.filteroutDuplicates(posts);
+    //   this.setState({ posts: noDuplicates });
+    // });
+  }
+
+  filteroutDuplicates(posts) {
+    const helperSet = Array();
+    console.log(posts);
+    try {
+      if (!posts || posts === undefined) {
+        return [];
+      }
+      const setOfPosts = posts.map(post => {
+        if (post.post !== undefined && helperSet.indexOf(post.post.id) === -1) {
+          helperSet.push(post.post.id);
+          return post;
+        }
+      });
+      const postArray = setOfPosts.filter(post => post !== undefined);
+      return postArray;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  filterPosts(receivedPosts) {
+    console.log(receivedPosts);
+    try {
+      if (Array.isArray(receivedPosts)) {
+        return receivedPosts.map(post => {
+          if (post.records.length && post.records.length > 0) {
+            const postInfo = post.records[0]._fields;
+            const postedBy = {
+              id: postInfo[0].identity.low,
+              username: postInfo[0].properties.username
+            };
+            const postDetails = {
+              id: postInfo[1].identity.low,
+              title: postInfo[1].properties.title,
+              content: postInfo[1].properties.text
+              // upvotes: postInfo[3].low
+            };
+            const community = {
+              id: postInfo[2].identity.low,
+              name: postInfo[2].properties.title
+            };
+            return {
+              postedBy: postedBy,
+              post: postDetails,
+              community: community
+            };
+          } else {
+            return {};
+          }
+        });
+      } else {
+        return [];
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   selectCategory(selectedValue) {
+    switch (selectedValue) {
+      case "overview": {
+        getUserOverview().then(res => {
+          const posts = this.filterPosts(res);
+          const noDuplicates = this.filteroutDuplicates(posts);
+          this.setState({ posts: noDuplicates, category: selectedValue });
+        });
+        break;
+      }
+      case "posts": {
+        getUserPublishedPosts().then(res => {
+          const posts = this.filterPosts(res);
+          const noDuplicates = this.filteroutDuplicates(posts);
+          this.setState({ posts: noDuplicates, category: selectedValue });
+        });
+
+        break;
+      }
+      case "comments": {
+        getUserCommentedPosts().then(res => {
+          const posts = this.filterPosts(res);
+          const noDuplicates = this.filteroutDuplicates(posts);
+          this.setState({ posts: noDuplicates, category: selectedValue });
+        });
+        break;
+      }
+      case "upvoted": {
+        getUserUpvotedPosts().then(res => {
+          console.log(res);
+          const posts = this.filterPosts(res);
+          console.log(posts)
+          const noDuplicates = this.filteroutDuplicates(posts);
+          this.setState({ posts: noDuplicates, category: selectedValue });
+        });
+        break;
+      }
+      case "downvoted": {
+        getUserDownvotedPosts().then(res => {
+          const posts = this.filterPosts(res);
+          const noDuplicates = this.filteroutDuplicates(posts);
+          this.setState({ posts: noDuplicates, category: selectedValue });
+        });
+        break;
+      }
+      case "saved": {
+        getUserSavedPosts().then(res => {
+          const posts = this.filterPosts(res);
+          const noDuplicates = this.filteroutDuplicates(posts);
+          this.setState({ posts: noDuplicates, category: selectedValue });
+        });
+        break;
+      }
+      default:
+        break;
+    }
+
     this.setState({ category: selectedValue });
   }
 
@@ -135,19 +212,19 @@ class UserProfile extends React.Component {
               ))}
             </Select>
           </Card>
-          {posts.length === 0 ? (
+          {posts.length === 0 || posts === undefined ? (
             <h2>No posts</h2>
           ) : (
-            posts.map(post => (
+            posts.map((post, index) => (
               <Post
                 openPost={this.openPost}
-                key={post.id}
-                id={post.id}
-                upvotes={post.upvotes}
-                title={post.title}
-                contentType={post.contentType}
-                content={post.content}
-                comments={post.comments}
+                key={post.post.id}
+                id={post.post.id}
+                upvotes={post.post.upvotes}
+                title={post.post.title}
+                contentType={"text"}
+                content={post.post.content}
+                comments={[]}
                 community={post.community}
                 postedBy={post.postedBy}
               />
@@ -157,19 +234,21 @@ class UserProfile extends React.Component {
         <GridItem xs={4}>
           <Card>
             <CardBody>
-              <h4>username</h4>
-              <Button
-                fullWidth
-                variant="contained"
-                size="small"
-                color="primary"
-                children="New Post"
-                onClick={this.handleAddNewPost}
-                classes={{
-                  root: classes.buttonOver,
-                  containedPrimary: classes.buttonColorPrimary
-                }}
-              />
+              <h4>{this.state.username}</h4>
+              {this.props.userState === SIGNEDIN && (
+                <Button
+                  fullWidth
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  children="New Post"
+                  onClick={this.handleAddNewPost}
+                  classes={{
+                    root: classes.buttonOver,
+                    containedPrimary: classes.buttonColorPrimary
+                  }}
+                />
+              )}
             </CardBody>
           </Card>
         </GridItem>
@@ -181,7 +260,7 @@ class UserProfile extends React.Component {
           scroll="body"
         >
           <DialogContent classes={{ root: classes.dialogPostRoot }}>
-            {addNewPost && <AddNewPost />}
+            {addNewPost && <AddNewPost handleClose={this.handleClose} />}
           </DialogContent>
         </Dialog>
       </GridContainer>
@@ -189,4 +268,12 @@ class UserProfile extends React.Component {
   }
 }
 
-export default withStyles(UserProfileStyle)(UserProfile);
+function mapStateToProps(state) {
+  return {
+    userState: state.userState.state
+  };
+}
+
+const Connected = connect(mapStateToProps)(UserProfile);
+
+export default withStyles(UserProfileStyle)(Connected);

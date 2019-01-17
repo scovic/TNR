@@ -1,6 +1,7 @@
 import React from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
 import { Link } from "react-router-dom";
+import { SIGNEDIN } from "_state/userState";
 
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
@@ -9,23 +10,23 @@ import OutlinedInput from "@material-ui/core/OutlinedInput";
 
 import NavbarSelectStyle from "../../../assets/styles/containers/FirstPage/navbarSelectStyle";
 
-const loggedIn = true;
-
 class NavbarSelect extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showByCategory: loggedIn ? "home" : "popular"
+      showByCategory: this.props.userState === SIGNEDIN ? "home" : "popular"
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
+    this.props.changeCategory(event.target.value);
   }
 
   render() {
     const { classes } = this.props;
+    const signedIn = this.props.userState === SIGNEDIN;
     return (
       <form>
         <FormControl
@@ -45,7 +46,7 @@ class NavbarSelect extends React.Component {
               />
             }
           >
-            {loggedIn ? (
+            {signedIn ? (
               <MenuItem classes={{ root: classes.menuItemRoot }} value="home">
                 <Link
                   to="/"

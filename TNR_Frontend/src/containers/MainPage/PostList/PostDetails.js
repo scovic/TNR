@@ -1,10 +1,21 @@
 import React from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
+import JwtDecode from "jwt-decode";
 import GridContainer from "components/Grid/GridContainer";
 import GridItem from "components/Grid/GridItem";
 import Card from "components/Card/Card";
 import Action from "components/CustomAction/Action";
 import Comment from "./Comment";
+import { connect } from "react-redux";
+import { SIGNEDIN } from "_state/userState";
+import {
+  upVotePost,
+  downVotePost,
+  savePost,
+  addNewComment,
+  getCommentsForPost,
+  getRecommended
+} from "services/general.service";
 
 import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/TextField";
@@ -23,18 +34,130 @@ class PostDetails extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      comment: ""
+      comments: [],
+      comment: "",
+      postInfoState: null,
+      recommended: []
     };
     this.handleChange = this.handleChange.bind(this);
+    this.upvote = this.upvote.bind(this);
+    this.downvote = this.downvote.bind(this);
+    this.savePost = this.savePost.bind(this);
+    this.comment = this.comment.bind(this);
+  }
+
+  componentDidMount() {
+    if (this.props.userState === SIGNEDIN) {
+      Promise.all([
+        getCommentsForPost({ id: this.props.postInfoProp.id }),
+        getRecommended({ title: this.props.postInfoProp.community.name })
+      ]).then(resultArray => {
+        const comments = this.filterResponse(resultArray[0]);
+        const recommendation = this.filterRecommended(resultArray[1]);
+        this.setState({
+          comments: comments,
+          postInfoState: this.props.postInfoProp,
+          recommended: recommendation
+        });
+      });
+    } else {
+      getCommentsForPost({ id: this.props.postInfoProp.id }).then(res => {
+        const comments = this.filterResponse(res);
+        this.setState({
+          comments: comments,
+          postInfoState: this.props.postInfoProp
+        });
+      });
+    }
+  }
+
+  filterResponse(comments) {
+    return comments.map(comment => {
+      const commentInfo = comment._fields;
+      const postedBy = {
+        id: commentInfo[0].identity.low,
+        username: commentInfo[0].properties.username
+      };
+      const commentDetails = {
+        id: commentInfo[1].identity.low,
+        content: commentInfo[1].properties.content
+      };
+      return { postedBy, commentDetails };
+    });
+  }
+
+  filterRecommended(recommended) {
+    return recommended.map(recom => {
+      const recommendation = recom._fields[0];
+
+      return {
+        id: recommendation.identity.low,
+        name: recommendation.properties.title,
+        subject: recommendation.properties.subject,
+        rules: recommendation.properties.rules
+      };
+    });
+  }
+
+  comment() {
+    const token = localStorage.getItem("accToken");
+    const decodedToken = JwtDecode(token);
+    const username = decodedToken.username;
+    const userId = decodedToken.id;
+    const localObj = {
+      commentDetails: { content: this.state.comment },
+      postedBy: {
+        username: username,
+        id: userId
+      }
+    };
+    const objToSend = {
+      comment: { content: this.state.comment },
+      post: { id: this.state.postInfoState.id }
+    };
+
+    addNewComment(objToSend).then(resp => {
+      this.setState({
+        comments: [...this.state.comments, localObj],
+        comment: ""
+      });
+    });
   }
 
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  render() {
-    const { classes, handleClose, postInfo } = this.props;
+  upvote() {
+    if (this.props.userState === SIGNEDIN) {
+      let upvotes = this.state.postInfoState.id;
+      const post = {
+        id: this.state.postInfoState.id
+      };
+      upVotePost(post).then(res => this.setState({ upvotes: ++upvotes }));
+    }
+  }
 
+  downvote() {
+    if (this.props.userState === SIGNEDIN) {
+      let upvotes = this.state.postInfoState.id;
+      const post = {
+        id: this.state.postInfoState.id
+      };
+      downVotePost(post).then(res => this.setState({ upvotes: --upvotes }));
+    }
+  }
+
+  savePost() {
+    if (this.props.userState === SIGNEDIN) {
+      savePost(this.state.postInfoState.id);
+    }
+  }
+
+  render() {
+    const { classes, handleClose, postInfoProp } = this.props;
+    const { postInfoState } = this.state;
+    const postInfo = postInfoState || postInfoProp;
     const upvotesToShow =
       postInfo.upvotes > 999
         ? `${(postInfo.upvotes / 1000).toFixed(1)}k`
@@ -60,6 +183,7 @@ class PostDetails extends React.Component {
     const upvotesSection = (
       <React.Fragment>
         <IconButton
+          onClick={this.upvote}
           classes={{
             root: classes.primaryIconButton
           }}
@@ -70,6 +194,7 @@ class PostDetails extends React.Component {
           <span className={classes.upvoteNumber}>{upvotesToShow}</span>
         </div>
         <IconButton
+          onClick={this.downvote}
           classes={{
             root: classes.secondaryIconButton
           }}
@@ -96,12 +221,13 @@ class PostDetails extends React.Component {
           nohover={true}
           icon={<CommentsIcon className={classes.actionIcon} />}
           label={
-            postInfo.comments.length > 0
-              ? `${postInfo.comments.length} Comments`
+            this.state.comments.length > 0
+              ? `${this.state.comments.length} Comments`
               : "Comment"
           }
         />
         <Action
+          onClick={this.savePost}
           icon={<BookmarkIcon className={classes.actionIcon} />}
           label="Save"
         />
@@ -112,28 +238,24 @@ class PostDetails extends React.Component {
       <React.Fragment>
         <h3>Communities we recommend for you:</h3>
         <ul className={classes.communityList}>
-          <li
-            className={
-              classes.communityName +
-              " " +
-              classes.hover +
-              " " +
-              classes.listItem
-            }
-          >
-            one
-          </li>
-          <li
-            className={
-              classes.communityName +
-              " " +
-              classes.hover +
-              " " +
-              classes.listItem
-            }
-          >
-            two
-          </li>
+          {this.state.recommended.length > 0 ? (
+            this.state.recommended.map((recom, index) => (
+              <li
+                key={index}
+                className={
+                  classes.communityName +
+                  " " +
+                  classes.hover +
+                  " " +
+                  classes.listItem
+                }
+              >
+                {recom.name}
+              </li>
+            ))
+          ) : (
+            <h3>Searching...</h3>
+          )}
         </ul>
       </React.Fragment>
     );
@@ -159,34 +281,45 @@ class PostDetails extends React.Component {
                 </div>
                 {textContent}
                 {actions}
-                <div className={classes.comments}>
-                  Comments
-                  <br />
-                  <TextField
-                    value={this.state.comment}
-                    name="comment"
-                    multiline
-                    fullWidth
-                    margin="dense"
-                    variant="outlined"
-                    onChange={this.handleChange}
-                    rows={5}
-                  />
-                  <br />
-                  <Button
-                    variant="contained"
-                    size="small"
-                    color="primary"
-                    children="Comment"
-                    classes={{
-                      root: classes.buttonOver,
-                      containedPrimary: classes.buttonColorPrimary
-                    }}
-                  />
-                </div>
+                {this.props.userState === SIGNEDIN ? (
+                  <div className={classes.comments}>
+                    Comments
+                    <br />
+                    <TextField
+                      value={this.state.comment}
+                      name="comment"
+                      multiline
+                      fullWidth
+                      margin="dense"
+                      variant="outlined"
+                      onChange={this.handleChange}
+                      rows={5}
+                    />
+                    <br />
+                    <Button
+                      onClick={this.comment}
+                      variant="contained"
+                      size="small"
+                      color="primary"
+                      children="Comment"
+                      classes={{
+                        root: classes.buttonOver,
+                        containedPrimary: classes.buttonColorPrimary
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div>You need to sign in to comment</div>
+                )}
                 <div className={classes.commentSection}>
-                  {postInfo.comments.length > 0 ? (
-                    <h2>comments</h2>
+                  {this.state.comments.length > 0 ? (
+                    this.state.comments.map((comment, index) => (
+                      <Comment
+                        key={index}
+                        postedBy={comment.postedBy}
+                        content={comment.commentDetails.content}
+                      />
+                    ))
                   ) : (
                     <h2>There are no comments for this post!</h2>
                   )}
@@ -203,4 +336,12 @@ class PostDetails extends React.Component {
   }
 }
 
-export default withStyles(PostDetailsStyle)(PostDetails);
+function mapStateToProps(state) {
+  return {
+    userState: state.userState.state
+  };
+}
+
+const Connected = connect(mapStateToProps)(PostDetails);
+
+export default withStyles(PostDetailsStyle)(Connected);

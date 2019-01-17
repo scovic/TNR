@@ -1,10 +1,13 @@
 import React from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
+import { SIGNEDIN } from "_state/userState";
+import { upVotePost, downVotePost, savePost } from "services/general.service";
 
 import Card from "components/Card/Card";
 import GridContainer from "components/Grid/GridContainer";
 import GridItem from "components/Grid/GridItem";
 import Action from "components/CustomAction/Action";
+import { connect } from "react-redux";
 
 import IconButton from "@material-ui/core/IconButton";
 
@@ -29,6 +32,9 @@ class Post extends React.Component {
       postedBy: { username: "test", id: 2 }
     };
     this.handleClick = this.handleClick.bind(this);
+    this.upvote = this.upvote.bind(this);
+    this.downvote = this.downvote.bind(this);
+    this.savePost = this.savePost.bind(this);
   }
 
   componentDidMount() {
@@ -83,6 +89,32 @@ class Post extends React.Component {
     openPost(postDetails);
   }
 
+  upvote() {
+    if (this.props.userState === SIGNEDIN) {
+      let upvotes = this.state.upvotes;
+      const post = {
+        id: this.state.id
+      };
+      upVotePost(post).then(res => this.setState({ upvotes: ++upvotes }));
+    }
+  }
+
+  downvote() {
+    if (this.props.userState === SIGNEDIN) {
+      let upvotes = this.state.upvotes;
+      const post = {
+        id: this.state.id
+      };
+      downVotePost(post).then(res => this.setState({ upvotes: --upvotes }));
+    }
+  }
+
+  savePost() {
+    if (this.props.userState === SIGNEDIN) {
+      savePost(this.state.id);
+    }
+  }
+
   render() {
     const {
       title,
@@ -100,6 +132,7 @@ class Post extends React.Component {
     const upvotesSection = (
       <React.Fragment>
         <IconButton
+          onClick={this.upvote}
           classes={{
             root: classes.primaryIconButton
           }}
@@ -110,6 +143,7 @@ class Post extends React.Component {
           <span className={classes.upvoteNumber}>{upvotesToShow}</span>
         </div>
         <IconButton
+          onClick={this.downvote}
           classes={{
             root: classes.secondaryIconButton
           }}
@@ -140,6 +174,7 @@ class Post extends React.Component {
           }
         />
         <Action
+          onClick={this.savePost}
           icon={<BookmarkIcon className={classes.actionIcon} />}
           label="Save"
         />
@@ -169,4 +204,12 @@ class Post extends React.Component {
   }
 }
 
-export default withStyles(PostStyle)(Post);
+function mapStateToProps(state) {
+  return {
+    userState: state.userState.state
+  };
+}
+
+const Connected = connect(mapStateToProps)(Post);
+
+export default withStyles(PostStyle)(Connected);

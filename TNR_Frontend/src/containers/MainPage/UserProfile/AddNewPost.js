@@ -1,5 +1,6 @@
 import React from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
+import { getUserCommunities, addNewPost } from "services/general.service";
 
 import GridItem from "components/Grid/GridItem";
 import GridContainer from "components/Grid/GridContainer";
@@ -12,13 +13,6 @@ import Button from "@material-ui/core/Button";
 import MenuItem from "@material-ui/core/MenuItem";
 
 import AddNewPostStyle from "../../../assets/styles/containers/FirstPage/signInStyle";
-
-const mockCommunities = [
-  { name: "com1" },
-  { name: "com2" },
-  { name: "com3" },
-  { name: "com4" }
-];
 
 class AddNewPost extends React.Component {
   constructor(props) {
@@ -35,14 +29,29 @@ class AddNewPost extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({
-      subCommunities: mockCommunities,
-      community: mockCommunities[0].name
+    getUserCommunities().then(res => {
+      const communities = this.filterResponse(res);
+      if (communities.length > 0) {
+        this.setState({
+          subCommunities: communities,
+          community: communities[0].name
+        });
+      }
     });
   }
 
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
+  }
+
+  filterResponse(resp) {
+    return resp.map(comm => {
+      const communityInfo = comm._fields;
+      return {
+        id: communityInfo[0].identity.low,
+        name: communityInfo[0].properties.title
+      };
+    });
   }
 
   selectCommunity(selectedValue) {
@@ -51,9 +60,20 @@ class AddNewPost extends React.Component {
 
   handleAddPost() {
     const { title, content, community } = this.state;
-    console.log(title);
-    console.log(content);
-    console.log(community);
+    if (community.length > 0) {
+      const objToSend = {
+        post: {
+          title: title,
+          text: content
+        },
+        community: {
+          title: community
+        }
+      };
+
+      addNewPost(objToSend);
+      this.props.handleClose();
+    }
   }
 
   render() {
@@ -67,7 +87,7 @@ class AddNewPost extends React.Component {
           </Typography>
           <Select selectedItem={community} select={this.selectCommunity}>
             {subCommunities.length > 0
-              ? mockCommunities.map((community, index) => {
+              ? subCommunities.map((community, index) => {
                   return (
                     <MenuItem
                       key={index}
@@ -104,19 +124,23 @@ class AddNewPost extends React.Component {
             onChange={this.handleChange}
             rows={7}
           />
-          <div className={classes.fullWidth}>
-            <Button
-              variant="contained"
-              color="primary"
-              className={classes.button}
-              classes={{
-                root: classes.buttonRoot,
-                containedPrimary: classes.buttonColorPrimary
-              }}
-              children="Add Post"
-              onClick={this.handleAddPost}
-            />
-          </div>
+          {this.state.subCommunities.length > 0 ? (
+            <div className={classes.fullWidth}>
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.button}
+                classes={{
+                  root: classes.buttonRoot,
+                  containedPrimary: classes.buttonColorPrimary
+                }}
+                children="Add Post"
+                onClick={this.handleAddPost}
+              />
+            </div>
+          ) : (
+            <h5>You should subscribe to some communities, it's fun!</h5>
+          )}
         </GridItem>
       </GridContainer>
     );

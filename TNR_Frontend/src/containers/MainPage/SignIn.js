@@ -1,5 +1,10 @@
 import React from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
+import { signIn } from "services/auth.service.js";
+import { changeState } from "store/actions/stateActions";
+import { SIGNEDIN } from "_state/userState";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 
 import GridContainer from "../../components/Grid/GridContainer";
 import GridItem from "../../components/Grid/GridItem";
@@ -19,14 +24,27 @@ class SignIn extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSignIn = this.handleSignIn.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
 
+  clear() {
+    this.setState({ username: "", password: "" });
+  }
+
   handleSignIn() {
     const { username, password } = this.state;
+    signIn(username, password).then(result => {
+      if (result) {
+        this.props.changeUserState(SIGNEDIN);
+        this.props.handleClose();
+      } else {
+        this.clear();
+      }
+    });
   }
 
   handleKeyDown(event) {
@@ -46,6 +64,7 @@ class SignIn extends React.Component {
           <TextField
             fullWidth
             required
+            value={this.state.username}
             label="Username"
             name="username"
             className={classes.textField}
@@ -57,6 +76,7 @@ class SignIn extends React.Component {
           <TextField
             fullWidth
             required
+            value={this.state.password}
             type="password"
             label="Password"
             name="password"
@@ -95,5 +115,24 @@ class SignIn extends React.Component {
     );
   }
 }
+function mapStateToProps(state) {
+  return {
+    userState: state.userState
+  };
+}
 
-export default withStyles(SingInStyle)(SignIn);
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      changeUserState: changeState
+    },
+    dispatch
+  );
+}
+
+const Connected = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SignIn);
+
+export default withStyles(SingInStyle)(Connected);
