@@ -13,10 +13,21 @@ class Neo4jService {
       .catch(e => console.log(e))
   }
 
-  getAllCommunityPosts (communityTitle) {
+  getOneCommunityPosts (communityTitle) {
     const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
                     MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User) WHERE c.title='${communityTitle}'
                     RETURN u1, p, COUNT(r) as count
+                    ORDER BY p.created_at DESC
+                    LIMIT 30`
+    return this.neo4jModule.customizedQuery(query)
+      .catch(e => console.log(e))
+  }
+
+  getAllCommunityPosts (username) {
+    const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
+                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User) WHERE u1.username='${username}'
+                    RETURN u1, p, c, COUNT(r) as count
+                    ORDER BY p.created_at DESC
                     LIMIT 30`
     return this.neo4jModule.customizedQuery(query)
       .catch(e => console.log(e))
@@ -24,8 +35,9 @@ class Neo4jService {
 
   getMostPopular () {
     const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
-                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User)'
-                    RETURN u1, p, COUNT(r) as count ORDER BY count DESC
+                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User)                    
+                    RETURN u1, p, c, COUNT(r) as count
+                    ORDER BY count DESC
                     LIMIT 30`
     return this.neo4jModule.customizedQuery(query)
       .catch(e => console.log(e))
@@ -33,9 +45,18 @@ class Neo4jService {
 
   getMostRecentlyAddedPosts () {
     const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
-                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User)'
-                    RETURN u1, p, COUNT(r) as count
+                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User)
+                    RETURN u1, p, c, COUNT(r) as count
                     ORDER BY p.created_at DESC
+                    LIMIT 30`
+    return this.neo4jModule.customizedQuery(query)
+      .catch(e => console.log(e))
+  }
+
+  getPostComments (postId) {
+    const query = `MATCH (p:Post)-[:HAS_COMMENT]-(c:Comment)-[:COMMENTED_BY]->(u:User)
+                    WHERE ID(p)=${postId}
+                    RETURN u,c
                     LIMIT 30`
     return this.neo4jModule.customizedQuery(query)
       .catch(e => console.log(e))

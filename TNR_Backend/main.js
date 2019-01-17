@@ -52,10 +52,17 @@ class Main {
       }
     },
     {
-      route: '/:community/', // home
+      route: '/community/:community', // one community posts
       method: 'get',
       onRequest: (req, res, next) => {
-        this.postRoutes.getAllCommunityPosts(req, res, next) // get community posts, users who posted them and number of likes
+        this.postRoutes.getOneCommunityPosts(req, res, next) // get community posts, users who posted them and number of likes
+      }
+    },
+    {
+      route: '/home', // posts from all subscribed communities
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.postRoutes.getAllCommunityPosts(req, res, next)
       }
     },
     {
@@ -116,23 +123,16 @@ class Main {
     },
     {
       route: '/user/overview', // redis gets post ids for posts which requested user posted, commented, upvoted, downvoted and saved
-      method: 'post', // for user id
+      method: 'post', // for requested user's id
       onRequest: (req, res, next) => {
         this.userRoutes.getAllUserActivity(req, res, next, false)
       }
     },
     {
-      route: '/comments/delete',
-      method: 'delete',
-      onRequest: (req, res, next) => {
-        this.commentRoutes.deleteComment(req, res, next)
-      }
-    },
-    {
-      route: '/post/community', // get community to which post belongs
+      route: '/post/comments',
       method: 'post',
       onRequest: (req, res, next) => {
-        this.postRoutes.getCommunity(req, res, next)
+        this.commentRoutes.getPostComments(req, res, next)
       }
     },
     {
@@ -140,6 +140,13 @@ class Main {
       method: 'put',
       onRequest: (req, res, next) => {
         this.commentRoutes.updateComment(req, res, next)
+      }
+    },
+    {
+      route: '/comments/delete',
+      method: 'delete',
+      onRequest: (req, res, next) => {
+        this.commentRoutes.deleteComment(req, res, next)
       }
     },
     {
@@ -178,7 +185,7 @@ class Main {
       }
     },
     {
-      route: '/user/savePost', // redis
+      route: '/user/save-post', // redis
       method: 'post',
       onRequest: (req, res, next) => {
         this.userRoutes.savePost(req, res, next)
