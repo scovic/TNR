@@ -45,7 +45,7 @@ const mockData = [
     content:
       " Vestibulum rhoncus augue a tortor accumsan finibus. Nullam elementum lectus vel arcu rutrum eleifend. Phasellus dictum sed risus sit amet luctus.",
     upvotes: 12,
-    comments: [],
+    comments: [1, 2, 3],
     community: {
       id: 15,
       name: "something"

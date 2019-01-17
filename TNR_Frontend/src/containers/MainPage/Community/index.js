@@ -5,17 +5,14 @@ import GridItem from "components/Grid/GridItem";
 import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
 
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
-import Button from "@material-ui/core/Button";
-import MenuItem from "@material-ui/core/MenuItem";
 
 import Post from "../PostList/Post";
+import AddNewCommunity from "./AddNewCommunity";
 
-import Select from "./Select";
-import AddNewPost from "./AddNewPost";
-
-import UserProfileStyle from "assets/styles/containers/UserProfile/userProfileStyle";
+import CommunityStyle from "assets/styles/containers/Community/communityStyle";
 
 const mockData = [
   {
@@ -70,70 +67,44 @@ const mockData = [
   }
 ];
 
-const Categories = [
-  "overview",
-  "posts",
-  "comments",
-  "upvoted",
-  "downvoted",
-  "saved"
-];
+const subscribed = false;
 
-class UserProfile extends React.Component {
+class Community extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      addNewPost: false,
-      userInfo: null,
-      posts: [],
-      category: ""
+      addNewCommunity: false,
+      posts: []
     };
-    this.openPost = this.openPost.bind(this);
+    this.handleAddNewCommunity = this.handleAddNewCommunity.bind(this);
     this.handleClose = this.handleClose.bind(this);
-    this.handleAddNewPost = this.handleAddNewPost.bind(this);
-    this.selectCategory = this.selectCategory.bind(this);
+    this.openPost = this.openPost.bind(this);
   }
 
   componentDidMount() {
-    this.setState({ posts: mockData, category: Categories[0] });
+    this.setState({ posts: mockData });
   }
 
-  selectCategory(selectedValue) {
-    this.setState({ category: selectedValue });
+  handleAddNewCommunity() {
+    this.setState({ addNewCommunity: true });
+  }
+
+  handleClose() {
+    this.setState({ addNewCommunity: false });
   }
 
   openPost(jsonObj) {
     this.props.openPost(jsonObj);
   }
 
-  handleClose() {
-    this.setState({ addNewPost: false });
-  }
-
-  handleAddNewPost() {
-    this.setState({ addNewPost: true });
-  }
-
   render() {
-    const { posts, addNewPost, category } = this.state;
+    const { posts, addNewCommunity } = this.state;
     const { classes } = this.props;
-
     return (
       <GridContainer>
         <GridItem xs={8}>
           <Card>
-            <Select selectedItem={category} select={this.selectCategory}>
-              {Categories.map((category, index) => (
-                <MenuItem
-                  key={index}
-                  classes={{ root: classes.menuItemRoot }}
-                  value={category}
-                  children={
-                    category.charAt(0).toUpperCase() + category.slice(1)
-                  }
-                />
-              ))}
-            </Select>
+            <h2>Community Name</h2>
           </Card>
           {posts.length === 0 ? (
             <h2>No posts</h2>
@@ -157,31 +128,46 @@ class UserProfile extends React.Component {
         <GridItem xs={4}>
           <Card>
             <CardBody>
-              <h4>username</h4>
+              <h3>community name</h3>
               <Button
                 fullWidth
-                variant="contained"
+                variant={subscribed ? "outlined" : "contained"}
                 size="small"
                 color="primary"
-                children="New Post"
-                onClick={this.handleAddNewPost}
+                children={subscribed ? "Unsubscribe" : "Subscribe"}
                 classes={{
                   root: classes.buttonOver,
-                  containedPrimary: classes.buttonColorPrimary
+                  containedPrimary: subscribed
+                    ? classes.buttonOutlinedColorPrimary
+                    : classes.buttonColorPrimary
                 }}
               />
+              <div style={{ marginTop: 6 }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  children="Add New Community?"
+                  onClick={this.handleAddNewCommunity}
+                  classes={{
+                    root: classes.buttonOver,
+                    containedPrimary: classes.buttonColorPrimary
+                  }}
+                />
+              </div>
             </CardBody>
           </Card>
         </GridItem>
         <Dialog
-          open={addNewPost}
+          open={addNewCommunity}
           fullWidth={true}
           maxWidth="sm"
           onClose={this.handleClose}
           scroll="body"
         >
           <DialogContent classes={{ root: classes.dialogPostRoot }}>
-            {addNewPost && <AddNewPost />}
+            {addNewCommunity && <AddNewCommunity />}
           </DialogContent>
         </Dialog>
       </GridContainer>
@@ -189,4 +175,4 @@ class UserProfile extends React.Component {
   }
 }
 
-export default withStyles(UserProfileStyle)(UserProfile);
+export default withStyles(CommunityStyle)(Community);

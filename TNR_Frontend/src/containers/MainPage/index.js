@@ -9,6 +9,7 @@ import Navbar from "./Navbar";
 import SignIn from "./SignIn";
 import SignUp from "./SignUp";
 import UserProfile from "./UserProfile";
+import Community from "./Community";
 
 import PostList from "./PostList";
 import PostDetails from "./PostList/PostDetails";
@@ -72,6 +73,11 @@ class MainPage extends React.Component {
             <Route path="/user">
               <GridItem xs={12} md={8}>
                 <UserProfile openPost={this.openPost} />
+              </GridItem>
+            </Route>
+            <Route path="/community">
+              <GridItem xs={12} md={8}>
+                <Community openPost={this.openPost} />
               </GridItem>
             </Route>
           </Switch>

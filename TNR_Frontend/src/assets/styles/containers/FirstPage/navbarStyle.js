@@ -1,8 +1,7 @@
 import {
   buttonColorPrimary,
   buttonOutlinedColorPrimary,
-  iconButton,
-  primaryColor
+  iconButton
 } from "../../generalStyle";
 
 const navbarStyle = theme => ({
