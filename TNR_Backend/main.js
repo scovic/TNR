@@ -45,6 +45,13 @@ class Main {
       }
     },
     {
+      route: '/user/published', // redis gets post ids for posts which logged-in user posted
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserPosts(req, res, next)
+      }
+    },
+    {
       route: '/communities',
       method: 'get',
       onRequest: (req, res, next) => {
@@ -118,6 +125,7 @@ class Main {
       route: '/user/overview', // redis gets post ids for posts which logged in user posted, commented, upvoted, downvoted and saved
       method: 'get',
       onRequest: (req, res, next) => {
+        console.log('USO U OVERVIEW')
         this.userRoutes.getAllUserActivity(req, res, next, true)
       }
     },
@@ -203,6 +211,34 @@ class Main {
       method: 'post',
       onRequest: (req, res, next) => {
         this.userRoutes.getRecommendedCommunities(req, res, next)
+      }
+    },
+    {
+      route: '/user/upvoted', // redis gets post ids for posts which logged-in user liked
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserUpvotedPosts(req, res, next)
+      }
+    },
+    {
+      route: '/user/downvoted', // redis gets post ids for posts which logged-in user disliked
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserDownvotedPosts(req, res, next)
+      }
+    },
+    {
+      route: '/user/commented', // redis gets post ids for posts which logged-in user commented on
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserCommentedPosts(req, res, next)
+      }
+    },
+    {
+      route: '/user/saved', // redis gets post ids for posts which logged-in user saved
+      method: 'get',
+      onRequest: (req, res, next) => {
+        this.userRoutes.getAllUserSavedPosts(req, res, next)
       }
     }]
   }

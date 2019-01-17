@@ -62,6 +62,24 @@ class Neo4jService {
       .catch(e => console.log(e))
   }
 
+  getDetailsByPostId (post) {
+    const postId = post.records[0]._fields[0].identity.low
+    const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
+                    MATCH (p:Post)-[r:UPVOTED_BY]->(u2:User) WHERE ID(p)=${postId}              
+                    RETURN u1, p, c, COUNT(r) as count
+                    ORDER BY count DESC
+                    LIMIT 30`
+    return this.neo4jModule.customizedQuery(query)
+  }
+
+  getPostsById (postId) {
+    const query = `MATCH (c:Community)-[:HAS_POST]-(p:Post)-[:PUBLISHED_BY]->(u1:User)
+                    WHERE ID(p)=${postId}              
+                    RETURN u1, p, c
+                    LIMIT 30`
+    return this.neo4jModule.customizedQuery(query)
+  }
+
   createPost (post, user, community) {
     return this.neo4jModule.createNode('Post', post)
       .then(resp => {
@@ -146,19 +164,50 @@ class Neo4jService {
           .then(post => {
             posts.push(post)
             if (--count === 0) {
-              callback(null, posts)
+              let filtered = posts.filter(el => el !== undefined)
+              callback(null, filtered)
             }
           }))
       })
     })(idsArr)
   }
 
+  getDetails (ids, counter) { // ids -> array to send to getDetailsByPostId until --counter === 0
+    return bindNodeCallback((ids, counter, callback) => {
+      let posts = []
+      return ids.forEach(id => {
+        this.getDetailsByPostId(id).then(post => {
+          posts = [...posts, post]
+          if (--counter === 0) {
+            callback(null, posts)
+          }
+        })
+      })
+    })(ids, counter)
+  }
+
   getAllUserActivity (id) {
     const observable = this.getAllUserActivityIds(id).pipe(
       flatMap(idsArr => this.getAllUserActivityTmp(idsArr)),
+      flatMap(ids => this.getDetails(ids, ids.length)),
       map(result => result)
     )
     return observable
+  }
+
+  getPostsByPostId (ids, counter) { // ids -> array to send to getDetailsByPostId until --counter === 0
+    return bindNodeCallback((ids, counter, callback) => {
+      let posts = []
+      return ids.forEach(id => {
+        let num = parseInt(id)
+        this.getPostsById(num).then(post => {
+          posts = [...posts, post]
+          if (--counter === 0) {
+            callback(null, posts)
+          }
+        })
+      })
+    })(ids, counter)
   }
 }
 

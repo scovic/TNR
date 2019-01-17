@@ -17,7 +17,11 @@ class UserRoutes {
       const decodedToken = jwtDecode(token)
       let id = ''
       me ? id = decodedToken.userId : id = req.body.id
-      this.neo4jService.getAllUserActivity(id).subscribe(posts => res.status(200).send(posts))
+      return this.neo4jService.getAllUserActivity(id).subscribe(result => {
+        console.log('rezultat u overview')
+        console.log(result)
+        return res.status(200).send(result)
+      })
       //   } else {
       //     res.status(403).send({ error: 'Authorization Error. Access Denied.' })
       //   }
@@ -36,7 +40,13 @@ class UserRoutes {
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
       return this.redis.getOne(id, 'posts')
-        .then((result) => res.status(200).send(result))
+        .then(result => {
+          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+            console.log('rezultat za objavljene postove')
+            console.log(r)
+            res.status(200).send(r)
+          })
+        })
         .catch(e => res.status(400).send(e))
       //   } else {
       //     res.status(403).send({ error: 'Authorization Error. Access Denied.' })
@@ -56,7 +66,13 @@ class UserRoutes {
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
       return this.redis.getOne(id, 'upvotes')
-        .then((result) => res.status(200).send(result))
+        .then(result => {
+          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+            console.log('rezultat za upvotes')
+            console.log(r)
+            res.status(200).send(r)
+          })
+        })
         .catch(e => res.status(400).send(e))
       //   } else {
       //     res.status(403).send({ error: 'Authorization Error. Access Denied.' })
@@ -76,7 +92,13 @@ class UserRoutes {
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
       return this.redis.getOne(id, 'downvotes')
-        .then((result) => res.status(200).send(result))
+        .then(result => {
+          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+            console.log('rezultat za downvotes')
+            console.log(r)
+            res.status(200).send(r)
+          })
+        })
         .catch(e => res.status(400).send(e))
       //   } else {
       //     res.status(403).send({ error: 'Authorization Error. Access Denied.' })
@@ -96,7 +118,13 @@ class UserRoutes {
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
       return this.redis.getOne(id, 'comments')
-        .then((result) => res.status(200).send(result))
+        .then(result => {
+          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+            console.log('rezultat za komentarisane')
+            console.log(r)
+            res.status(200).send(r)
+          })
+        })
         .catch(e => res.status(400).send(e))
       //   } else {
       //     res.status(403).send({ error: 'Authorization Error. Access Denied.' })
@@ -136,8 +164,14 @@ class UserRoutes {
       const token = header.slice(7)
       const decodedToken = jwtDecode(token)
       const id = decodedToken.userId
-      return this.redis.getOne(id, 'savedPosts')
-        .then((result) => res.status(200).send(result))
+      return this.redis.getOne(id, 'saved')
+        .then(result => {
+          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+            console.log('rezultat za sacuvane')
+            console.log(r)
+            res.status(200).send(r)
+          })
+        })
         .catch(e => res.status(400).send(e))
       //   } else {
       //     res.status(403).send({ error: 'Authorization Error. Access Denied.' })
@@ -197,15 +231,7 @@ class UserRoutes {
       // if (result) {
       const obj = req.body
       return this.neo4j.selectMultipleRelationshipByNode1('Community', 'User', 'Community', obj, 'SUBSCRIBER', 'SUBSCRIBER')
-        .then(result => {
-          let set = []
-          result.records.forEach((el, ind) => {
-            if (set.indexOf(el._fields) === -1) {
-              set = [...set, el._fields]
-            }
-          })
-          res.status(200).send(set)
-        })
+        .then(result => res.status(200).send(result.records))
         .catch(e => res.status(400).send(e))
       //   } else {
       //     res.status(403).send({ error: 'Authorization Error. Access Denied.' })

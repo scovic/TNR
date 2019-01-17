@@ -211,12 +211,12 @@ class Neo4j {
     keys.forEach(key => {
       retQuery += `n3.${key}, `
     })
-    id ? retQuery += `ID(n3)` : retQuery = retQuery.slice(0, query.length - 2)
+    id ? retQuery += `ID(n3)` : retQuery = retQuery.slice(0, retQuery.length - 2)
 
     return this.session.run(
       `MATCH (n1:${lab1})-[:${rel1}]->(:${lab2})<-[:${rel2}]-(n3:${lab3})
        WHERE ${query}
-       RETURN ${retQuery}
+       RETURN n1
        LIMIT 30`
     ).catch(e => console.log(e))
   }
