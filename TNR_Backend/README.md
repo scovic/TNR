@@ -10,12 +10,6 @@ $ node index.js
 ## Setup
 For environment setup, create .env file based on .env-example and fill configuration objects with those variables
 
-## Creating demo DB
-Run this command only once. It will fill neo4j database with mock data. There are no relationships at the beginning. You still need to register as a user and test implemented functions to fill the database with neccessary relationships.
-```
-node db/createDemoDb.js
-```
-
 ## Configuration objects
 ##### Server configuration object:
 ```

@@ -67,7 +67,7 @@ class UserRoutes {
       const id = decodedToken.userId
       return this.redis.getOne(id, 'upvotes')
         .then(result => {
-          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+          this.neo4jService.getPostsByPostId(result.upvotes, result.upvotes.length).subscribe(r => {
             console.log('rezultat za upvotes')
             console.log(r)
             res.status(200).send(r)
@@ -93,7 +93,7 @@ class UserRoutes {
       const id = decodedToken.userId
       return this.redis.getOne(id, 'downvotes')
         .then(result => {
-          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+          this.neo4jService.getPostsByPostId(result.downvotes, result.downvotes.length).subscribe(r => {
             console.log('rezultat za downvotes')
             console.log(r)
             res.status(200).send(r)
@@ -119,7 +119,7 @@ class UserRoutes {
       const id = decodedToken.userId
       return this.redis.getOne(id, 'comments')
         .then(result => {
-          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+          this.neo4jService.getPostsByPostId(result.comments, result.comments.length).subscribe(r => {
             console.log('rezultat za komentarisane')
             console.log(r)
             res.status(200).send(r)
@@ -166,7 +166,7 @@ class UserRoutes {
       const id = decodedToken.userId
       return this.redis.getOne(id, 'saved')
         .then(result => {
-          this.neo4jService.getPostsByPostId(result.posts, result.posts.length).subscribe(r => {
+          this.neo4jService.getPostsByPostId(result.saved, result.saved.length).subscribe(r => {
             console.log('rezultat za sacuvane')
             console.log(r)
             res.status(200).send(r)
